@@ -45,6 +45,8 @@ reg		[9:0]		Cur_Color_R;
 reg		[9:0]		Cur_Color_G;
 reg		[9:0]		Cur_Color_B;
 reg					obraz;  			// (jd)
+reg					obrazDlaPiksela;  	
+reg			        obrazDlaProstokata;
 
 
 assign	oVGA_BLANK	=	oVGA_H_SYNC & oVGA_V_SYNC;
@@ -78,14 +80,92 @@ oVGA_B	<=	10'b0000000000;										// (jd)
 		
 obraz =   (H_Cont > H_SYNC_CYC + H_SYNC_BACK)                	// (jd)
 		& (H_Cont < H_SYNC_CYC + H_SYNC_BACK + H_SYNC_ACT);  	// (jd)
+		
+		
+//po dodaniu V_Cont
+/*
+obraz =   (H_Cont > H_SYNC_CYC + H_SYNC_BACK)               
+		& (H_Cont < H_SYNC_CYC + H_SYNC_BACK + H_SYNC_ACT);  	
+		& (V_Cont > V_SYNC_CYC + V_SYNC_BACK)       
+		& (V_Cont < V_SYNC_CYC + V_SYNC_BACK + V_SYNC_ACT);   	
+*/		
 
-if( obraz )// (jd)
-	oVGA_R	<=	10'b1111111111;									// (jd)
-	oVGA_G	<=	10'b0000000000;									// (jd)
-	oVGA_B	<=	10'b0000000000;									// (jd)
-end																// (jd)
+		
+obrazDlaProstokata =   (H_Cont > H_SYNC_CYC + H_SYNC_BACK + 100)       
+		& (H_Cont < H_SYNC_CYC + H_SYNC_BACK + H_SYNC_ACT - 100); 
+		
+	
+//po dodaniu V_Cont	
+/*
+obrazDlaProstokata =   (H_Cont > H_SYNC_CYC + H_SYNC_BACK + 100)       
+		& (H_Cont < H_SYNC_CYC + H_SYNC_BACK + H_SYNC_ACT - 100);  
+		& 			   (V_Cont > V_SYNC_CYC + V_SYNC_BACK + 100)       
+		& (V_Cont < V_SYNC_CYC + V_SYNC_BACK + V_SYNC_ACT - 100);   	
+*/		
 
 
+obrazDlaPiksela = (H_Cont == 300);  	
+
+
+//po dodaniu V_Cont
+/*
+obrazDlaPiksela = (H_Cont == 300);  	
+				  (V_Cont == 300);
+*/
+
+if( obrazDlaPiksela )
+	begin
+	oVGA_R	<=	10'b0000000000;								
+	oVGA_G	<=	10'b0000000000;								
+	oVGA_B	<=	10'b1111111111;						
+end
+else
+	if( obrazDlaProstokata )
+	begin
+		oVGA_R	<=	10'b1111111111;								
+		oVGA_G	<=	10'b0000000000;								
+		oVGA_B	<=	10'b0000000000;								
+	end
+else		
+	if( obraz )// (jd)
+	begin
+		oVGA_R	<=	10'b0000000000;									// (jd)
+		oVGA_G	<=	10'b1111111111;									// (jd)
+		oVGA_B	<=	10'b0000000000;									// (jd)
+	end
+end																	// (jd)
+
+/*
+Szanowna Pani.
+
+Przygl¹dn¹³em siê Pañstwa projektowi VGA i stwierdzam,
+¿e problem wynika z faktu, i¿ podaj¹ Pañstwo sygna³ RGB
+w czasie przeznaczonym na sygna³y synchronizuj¹ce.
+Uk³ad który znajduje siê w DE2-70 tego nie toleruje
+i wy³¹cza wówczas obraz RGB ca³kowicie.
+
+Zmodyfikowa³em Pañstwa kod dodaj¹c sygna³ "obraz",
+który przyjmuje wartoœæ '1' gdy w linii sygna³u video
+jest czas na sygna³ RGB obrazu. Zatem sygna³y: RED, GREEN i BLUE
+mog¹ byæ ró¿ne od zera tylko wtedy gdy zmienna "obraz" jest
+równa jeden.
+
+Dodatkowo lepiej aby generowanie obrazu odbywa³o siê w procesie
+i by³o zsynchronizowane z procesami generuj¹cymi sygna³y
+synchronizacji V i H. Dlatego stworzy³em taki proces.
+W zwi¹zku z tym musia³em równie¿ zmieniæ zmienne: oVGA_R, oVGA_G
+i oVGA_B na typ register.
+
+Poprawiony plik "VGA_Controller.v" przesy³am w za³¹czniku.
+Wszystkie linie kodu zmodyfikowane lub dodane przeze mnie
+oznaczy³em na koñcu w komentarzu symbolem: (jd)
+Po podmianie tego pliku, projekt powinien generowaæ obraz czerwony.
+
+Proszê o potwierdzenie odebrania tej wiadomoœci.
+
+Pozdrawiam,
+
+(jd)*/
 
 
 
