@@ -47,11 +47,16 @@ reg		[9:0]		Cur_Color_B;
 reg					obraz;  			// (jd)
 reg					obrazDlaPiksela;  	
 reg			        obrazDlaProstokata;
+reg			        obrazDlaPoruszajacegoSiePiksela;
+reg		[9:0]		ValueChangeX;
+reg		[9:0]		ValueChangeY;
+
 
 
 assign	oVGA_BLANK	=	oVGA_H_SYNC & oVGA_V_SYNC;
 assign	oVGA_SYNC	=	1'b0;
 assign	oVGA_CLOCK	=	iCLK;
+
 /*
 assign	oVGA_R	=	R_R;
 
@@ -85,7 +90,7 @@ obraz =   (H_Cont > H_SYNC_CYC + H_SYNC_BACK)                	// (jd)
 //po dodaniu V_Cont
 /*
 obraz =   (H_Cont > H_SYNC_CYC + H_SYNC_BACK)               
-		& (H_Cont < H_SYNC_CYC + H_SYNC_BACK + H_SYNC_ACT);  	
+		& (H_Cont < H_SYNC_CYC + H_SYNC_BACK + H_SYNC_ACT) 	
 		& (V_Cont > V_SYNC_CYC + V_SYNC_BACK)       
 		& (V_Cont < V_SYNC_CYC + V_SYNC_BACK + V_SYNC_ACT);   	
 */		
@@ -98,42 +103,78 @@ obrazDlaProstokata =   (H_Cont > H_SYNC_CYC + H_SYNC_BACK + 100)
 //po dodaniu V_Cont	
 /*
 obrazDlaProstokata =   (H_Cont > H_SYNC_CYC + H_SYNC_BACK + 100)       
-		& (H_Cont < H_SYNC_CYC + H_SYNC_BACK + H_SYNC_ACT - 100);  
+		& (H_Cont < H_SYNC_CYC + H_SYNC_BACK + H_SYNC_ACT - 100)  
 		& 			   (V_Cont > V_SYNC_CYC + V_SYNC_BACK + 100)       
 		& (V_Cont < V_SYNC_CYC + V_SYNC_BACK + V_SYNC_ACT - 100);   	
 */		
 
 
-obrazDlaPiksela = (H_Cont == 300);  	
+obrazDlaPiksela = (H_Cont == 300);  		
 
 
 //po dodaniu V_Cont
 /*
-obrazDlaPiksela = (H_Cont == 300);  	
-				  (V_Cont == 300);
+obrazDlaPiksela = (H_Cont == 300)  	
+				  & (V_Cont == 300);
 */
 
-if( obrazDlaPiksela )
-	begin
+
+obrazDlaPoruszajacegoSiePiksela = (H_Cont == ValueChangeX);  
+
+//po dodaniu V_Cont
+/*
+obrazDlaPoruszajacegoSiePiksela = (H_Cont == ValueChangeX)
+								  & (V_Cont == ValueChangeY)
+*/
+if( obrazDlaPoruszajacegoSiePiksela )
+begin
 	oVGA_R	<=	10'b0000000000;								
-	oVGA_G	<=	10'b0000000000;								
+	oVGA_G	<=	10'b1111111111;								
 	oVGA_B	<=	10'b1111111111;						
 end
 else
-	if( obrazDlaProstokata )
+	if( obrazDlaPiksela )
 	begin
-		oVGA_R	<=	10'b1111111111;								
+		oVGA_R	<=	10'b0000000000;								
 		oVGA_G	<=	10'b0000000000;								
-		oVGA_B	<=	10'b0000000000;								
+		oVGA_B	<=	10'b1111111111;						
 	end
-else		
-	if( obraz )// (jd)
-	begin
-		oVGA_R	<=	10'b0000000000;									// (jd)
-		oVGA_G	<=	10'b1111111111;									// (jd)
-		oVGA_B	<=	10'b0000000000;									// (jd)
-	end
+	else
+		if( obrazDlaProstokata )
+		begin
+			oVGA_R	<=	10'b1111111111;								
+			oVGA_G	<=	10'b0000000000;								
+			oVGA_B	<=	10'b0000000000;								
+		end
+		else		
+		if( obraz )// (jd)
+		begin
+			oVGA_R	<=	10'b0000000000;									// (jd)
+			oVGA_G	<=	10'b1111111111;									// (jd)
+			oVGA_B	<=	10'b0000000000;									// (jd)
+		end
 end																	// (jd)
+///////////////////////////////////////////////////////////////////////////
+///////Drawing flying pixel////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////
+
+always@(posedge iCLK)	
+begin
+	if(H_Cont==300)
+		if (ValueChangeX > H_SYNC_CYC + H_SYNC_BACK 
+		& ValueChangeY > V_SYNC_CYC + V_SYNC_BACK
+		& ValueChangeX < H_SYNC_CYC + H_SYNC_BACK + H_SYNC_ACT 
+		& ValueChangeY < V_SYNC_CYC + V_SYNC_BACK + V_SYNC_ACT)
+		begin
+			ValueChangeX <= ValueChangeX - 1;
+			ValueChangeY <= ValueChangeY - 1;
+		end
+		else
+		begin
+			ValueChangeX <= 10'b0100000000;
+			ValueChangeY <= 10'b0100000000;
+		end
+end
 
 /*
 Szanowna Pani.
