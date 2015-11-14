@@ -82,8 +82,10 @@ module DE2_70_TOP
 		oHEX6_DP,						//  Seven Segment Digit 6 decimal point
 		oHEX7_D,						//	Seven Segment Digit 7
 		oHEX7_DP,						//  Seven Segment Digit 7 decimal point
+		*/
 		////////////////////////	LED		////////////////////////
 		oLEDG,							//	LED Green[8:0]
+		/*
 		oLEDR,							//	LED Red[17:0]
 		////////////////////////	UART	////////////////////////
 		oUART_TXD,						//	UART Transmitter
@@ -265,8 +267,10 @@ output	[6:0]	oHEX6_D;				//	Seven Segment Digit 6
 output			oHEX6_DP;				//  Seven Segment Digit 6 decimal point
 output	[6:0]	oHEX7_D;				//	Seven Segment Digit 7
 output			oHEX7_DP;				//  Seven Segment Digit 7 decimal point
+*/
 ////////////////////////////	LED		////////////////////////////
 output	[8:0]	oLEDG;					//	LED Green[8:0]
+/*
 output	[17:0]	oLEDR;					//	LED Red[17:0]
 ////////////////////////////	UART	////////////////////////////
 output			oUART_TXD;				//	UART Transmitter
@@ -448,6 +452,11 @@ VGA_Controller	myCtrl(	.iRed(mVGA_R),
 						.iCLK(VGA_CTRL_CLK),
 						.iRST_N(DLY_RST)			
 					);
+					
+PS2_Controller keyCtrl( .data(PS2_KBDAT),
+						.clk(PS2_KBCLK),
+						.led(oLEDG)
+);
 
 
 ////////////////////////////////////////
