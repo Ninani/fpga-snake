@@ -141,8 +141,8 @@ begin
 		& ValueChangeX < H_SYNC_CYC + H_SYNC_BACK + H_SYNC_ACT 
 		& ValueChangeY < V_SYNC_CYC + V_SYNC_BACK + V_SYNC_ACT)
 		begin
-			ValueChangeX <= ValueChangeX + 1;
-			ValueChangeY <= ValueChangeY + 1;
+			ValueChangeX <= ValueChangeX - 1;
+			ValueChangeY <= ValueChangeY - 1;
 		end
 		else
 		begin
