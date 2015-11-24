@@ -16,7 +16,11 @@ module	VGA_Controller(	//	Host Side
 						//	Control Signal
 						iCLK,
 						iRST_N,
-						iPresClk	);
+						iPresClk,
+						iUpButton,
+						iDownButton,
+						iLeftButton,
+						iRightButton,	);
 
 `include "VGA_Param.h"
 
@@ -39,6 +43,10 @@ output				oVGA_CLOCK;
 input				iCLK;
 input				iRST_N;
 input				iPresClk;
+input				iUpButton;
+input				iDownButton;
+input				iLeftButton;
+input				iRightButton;
 
 //	Internal Registers and Wires
 reg		[9:0]		H_Cont;
@@ -52,7 +60,7 @@ reg			        obrazDlaProstokata;
 reg			        obrazDlaPoruszajacegoSiePiksela;
 reg		[9:0]		ValueChangeX;
 reg		[9:0]		ValueChangeY;
-
+reg		[3072:0]    coordinates;
 
 
 assign	oVGA_BLANK	=	oVGA_H_SYNC & oVGA_V_SYNC;
@@ -99,8 +107,12 @@ obrazDlaPiksela = (H_Cont == 300)
 				  & (V_Cont == 300);
 
 */
-obrazDlaPoruszajacegoSiePiksela = (H_Cont == ValueChangeX)
-								  & (V_Cont == ValueChangeY);
+coordinates[2888] <= 1;
+
+obrazDlaPoruszajacegoSiePiksela =   (H_Cont <= ValueChangeX + 2)
+								  & (H_Cont >= ValueChangeX - 2)
+								  & (V_Cont <= ValueChangeY + 2)
+								  & (V_Cont >= ValueChangeY - 2);
 
 if( obrazDlaPoruszajacegoSiePiksela )
 begin
@@ -136,13 +148,13 @@ end																	// (jd)
 
 always@(posedge iPresClk)	
 begin
-		if (ValueChangeX > H_SYNC_CYC + H_SYNC_BACK 
-		& ValueChangeY > V_SYNC_CYC + V_SYNC_BACK
-		& ValueChangeX < H_SYNC_CYC + H_SYNC_BACK + H_SYNC_ACT 
-		& ValueChangeY < V_SYNC_CYC + V_SYNC_BACK + V_SYNC_ACT)
+		if (ValueChangeX > H_SYNC_CYC + H_SYNC_BACK + 5
+		& ValueChangeY > V_SYNC_CYC + V_SYNC_BACK + 5
+		& ValueChangeX < H_SYNC_CYC + H_SYNC_BACK + H_SYNC_ACT -5 
+		& ValueChangeY < V_SYNC_CYC + V_SYNC_BACK + V_SYNC_ACT -5)
 		begin
-			ValueChangeX <= ValueChangeX + 1;
-			ValueChangeY <= ValueChangeY + 1;
+			ValueChangeX <= ValueChangeX + 5*upDownDirection;
+			ValueChangeY <= ValueChangeY + 5*leftRightDirection;
 		end
 		else
 		begin
@@ -151,7 +163,10 @@ begin
 		end
 end
 
-
+always@(posedge iCLK)										
+begin			
+	
+end
 //dla ValueChangeX <= ValueChangeX + 1; to pokazuje sie 
 //taki szybki naprzemienny piorun z stojacego piksela w prawo i dol albo w lewo i dol
 //dla ValueChangeX <= ValueChangeX - 1; to pokazuje sie 
@@ -231,7 +246,39 @@ end
 reg		[9:0]		R_R;
 reg		[9:0]		G_G;
 reg		[9:0]		B_B;
+reg		upDownDirection;
+reg		leftRightDirection;
 
+
+always@(iUpButton or iLeftButton or iDownButton or iRightButton)
+begin
+	if(iUpButton)
+	begin
+		upDownDirection<=1;
+		leftRightDirection<=0;
+	end
+	else
+	begin
+	if(iDownButton)
+	begin
+		upDownDirection<=-1;
+		leftRightDirection<=0;
+	end
+	else
+	begin
+	if(iLeftButton)
+	begin
+		upDownDirection<=0;
+		leftRightDirection<=-1;
+	end
+	else
+	begin
+		upDownDirection<=0;
+		leftRightDirection<=1;
+	end	
+	end
+	end
+end
 
 
 /*

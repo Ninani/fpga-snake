@@ -3,7 +3,7 @@ module anim_prescaler (
 	output reg clkout
 );  
 
-parameter F_OSC = 50000; 
+parameter F_OSC = 50000000; 
 
 reg [31:0] counter; 
 

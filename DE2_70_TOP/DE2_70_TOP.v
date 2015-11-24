@@ -61,11 +61,11 @@ module DE2_70_TOP
 		iCLK_50_4,						//	50 MHz
 		iEXT_CLOCK,						//	External Clock
 		////////////////////	Push Button		////////////////////
-		/*
+		
 		iKEY,							//	Pushbutton[3:0]
 		////////////////////	DPDT Switch		////////////////////
 		iSW,							//	Toggle Switch[17:0]
-		////////////////////	7-SEG Dispaly	////////////////////
+		/*////////////////////	7-SEG Dispaly	////////////////////
 		oHEX0_D,						//	Seven Segment Digit 0
 		oHEX0_DP,						//  Seven Segment Digit 0 decimal point
 		oHEX1_D,						//	Seven Segment Digit 1
@@ -244,11 +244,11 @@ input           iCLK_50_3;				//	50 MHz
 input           iCLK_50_4;				//	50 MHz
 input           iEXT_CLOCK;				//	External Clock
 ////////////////////////	Push Button		////////////////////////
-/*
+
 input	[3:0]	iKEY;					//	Pushbutton[3:0]
 ////////////////////////	DPDT Switch		////////////////////////
 input	[17:0]	iSW;					//	Toggle Switch[17:0]
-////////////////////////	7-SEG Dispaly	////////////////////////
+/*////////////////////////	7-SEG Dispaly	////////////////////////
 output	[6:0]	oHEX0_D;				//	Seven Segment Digit 0
 output			oHEX0_DP;				//  Seven Segment Digit 0 decimal point
 output	[6:0]	oHEX1_D;				//	Seven Segment Digit 1
@@ -436,6 +436,30 @@ anim_prescaler	myPresc(
 						.clkin(VGA_CTRL_CLK),
 						.clkout(outerClk)			
 					);
+wire	buttonUp;
+wire	buttonDown;	
+wire	buttonLeft;	
+wire	buttonRight;							
+debouncer buttonUpDebouncer(		
+						.button(iKEY[0]),
+						.clk(VGA_CTRL_CLK),	
+						.bt_act(buttonUp)			
+					);
+debouncer buttonDownDebouncer(		
+						.button(iKEY[1]),
+						.clk(VGA_CTRL_CLK),
+						.bt_act(buttonDown)			
+					);
+debouncer buttonLeftDebouncer(		
+						.button(iKEY[2]),
+						.clk(VGA_CTRL_CLK),	
+						.bt_act(buttonLeft)			
+					);
+debouncer buttonRightDebouncer(		
+						.button(iKEY[3]),
+						.clk(VGA_CTRL_CLK),	
+						.bt_act(buttonRight)			
+					);
 					
 VGA_Controller	myCtrl(	.iRed(mVGA_R),
 						.iGreen(mVGA_G),
@@ -453,7 +477,12 @@ VGA_Controller	myCtrl(	.iRed(mVGA_R),
 						
 						.iCLK(VGA_CTRL_CLK),
 						.iRST_N(DLY_RST),
-						.iPresClk(outerClk)			
+						.iPresClk(outerClk),			
+						
+						.iUpButton(buttonUp),
+						.iDownButton(buttonDown),
+						.iLeftButton(buttonLeft),
+						.iRightButton(buttonRight)
 					);
 
 
