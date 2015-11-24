@@ -573,3 +573,4 @@ set_global_assignment -name VERILOG_FILE PLL.v
 set_global_assignment -name MISC_FILE "C:/Users/Anna/Desktop/snake_mikro_3/DE2_70_TOP/DE2_70_TOP.dpf"
 set_global_assignment -name QIP_FILE PLL.qip
 set_global_assignment -name VERILOG_FILE PS2_Controller.v
+set_global_assignment -name VERILOG_FILE Edge_Detect.v
