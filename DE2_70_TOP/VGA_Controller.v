@@ -103,7 +103,7 @@ obrazDlaProstokata =   (H_Cont > H_SYNC_CYC + H_SYNC_BACK + coordinates[2500:249
 		& (V_Cont < V_SYNC_CYC + V_SYNC_BACK + V_SYNC_ACT - coordinates[2500:2495]);   	
 
 coordinates[2888] <= 1;
-coordinates[2500:2495] <= 1;
+coordinates[2500:2495] <= 6'b111111;
 obrazDlaPoruszajacegoSiePiksela =   (H_Cont <= ValueChangeX + 5)
 								  & (H_Cont >= ValueChangeX - 4)
 								  & (V_Cont <= ValueChangeY + 5)
