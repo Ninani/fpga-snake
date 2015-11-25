@@ -102,8 +102,8 @@ obrazDlaProstokata =   (H_Cont > H_SYNC_CYC + H_SYNC_BACK + 100)
 		& 			   (V_Cont > V_SYNC_CYC + V_SYNC_BACK + 100)       
 		& (V_Cont < V_SYNC_CYC + V_SYNC_BACK + V_SYNC_ACT - 100);   	
 
-obrazDlaPoruszajacegoSiePiksela =   /*(H_Cont <= ValueChangeX + 5)*/
-								  /*& */(H_Cont >= ValueChangeX + 10*coordinates[2500:2491])
+obrazDlaPoruszajacegoSiePiksela =   (H_Cont <= H_SYNC_CYC + H_SYNC_BACK + H_SYNC_ACT)
+								  & (H_Cont >= ValueChangeX + 10*coordinates[2500:2491])
 								  & (V_Cont <= ValueChangeY + 5)
 								  & (V_Cont >= ValueChangeY - 4);
 
