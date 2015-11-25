@@ -97,15 +97,13 @@ obraz =   (H_Cont > H_SYNC_CYC + H_SYNC_BACK)                	// (jd)
 		& (H_Cont < H_SYNC_CYC + H_SYNC_BACK + H_SYNC_ACT);  	// (jd)
 		
 
-obrazDlaProstokata =   (H_Cont > H_SYNC_CYC + H_SYNC_BACK + coordinates[2500:2495])       
-		& (H_Cont < H_SYNC_CYC + H_SYNC_BACK + H_SYNC_ACT - coordinates[2500:2495])  
-		& 			   (V_Cont > V_SYNC_CYC + V_SYNC_BACK + coordinates[2500:2495])       
-		& (V_Cont < V_SYNC_CYC + V_SYNC_BACK + V_SYNC_ACT - coordinates[2500:2495]);   	
+obrazDlaProstokata =   (H_Cont > H_SYNC_CYC + H_SYNC_BACK + 100)       
+		& (H_Cont < H_SYNC_CYC + H_SYNC_BACK + H_SYNC_ACT - 100)  
+		& 			   (V_Cont > V_SYNC_CYC + V_SYNC_BACK + 100)       
+		& (V_Cont < V_SYNC_CYC + V_SYNC_BACK + V_SYNC_ACT - 100);   	
 
-coordinates[2888] <= 1;
-coordinates[2500:2495] <= 6'b111111;
-obrazDlaPoruszajacegoSiePiksela =   (H_Cont <= ValueChangeX + 5)
-								  & (H_Cont >= ValueChangeX - 4)
+obrazDlaPoruszajacegoSiePiksela =   /*(H_Cont <= ValueChangeX + 5)*/
+								  /*& */(H_Cont >= ValueChangeX + 10*coordinates[2500:2491])
 								  & (V_Cont <= ValueChangeY + 5)
 								  & (V_Cont >= ValueChangeY - 4);
 
@@ -152,6 +150,7 @@ begin
 			case(direction)
 			2'b11:
 				begin
+				   coordinates[2500:2491] <= coordinates[2500:2491]-1;
 				   ValueChangeX <= ValueChangeX;
 				   ValueChangeY <= ValueChangeY - 10;
 				end
@@ -159,16 +158,22 @@ begin
 				begin
 				   ValueChangeX <= ValueChangeX;
 				   ValueChangeY <= ValueChangeY + 10;
+				   coordinates[2500:2491] <= coordinates[2500:2491]+1;
 				end
 			2'b10:
 				begin
 				   ValueChangeX <= ValueChangeX - 10;
 				   ValueChangeY <= ValueChangeY;
+				   coordinates[2500:2491] <= coordinates[2500:2491]-1;
 				end
 			2'b01:
 				begin
-				   ValueChangeX <= ValueChangeX + 10;
-				   ValueChangeY <= ValueChangeY;
+					if((coordinates[2500:2491]+1)*10+ValueChangeX<H_SYNC_CYC + H_SYNC_BACK + H_SYNC_ACT -10)
+					begin
+						coordinates[2500:2491] <= coordinates[2500:2491]+1;
+						ValueChangeX <= ValueChangeX + 10;
+						ValueChangeY <= ValueChangeY;
+					end
 				end
 			endcase
 		end
