@@ -97,22 +97,18 @@ obraz =   (H_Cont > H_SYNC_CYC + H_SYNC_BACK)                	// (jd)
 		& (H_Cont < H_SYNC_CYC + H_SYNC_BACK + H_SYNC_ACT);  	// (jd)
 		
 
-obrazDlaProstokata =   (H_Cont > H_SYNC_CYC + H_SYNC_BACK + 100)       
-		& (H_Cont < H_SYNC_CYC + H_SYNC_BACK + H_SYNC_ACT - 100)  
-		& 			   (V_Cont > V_SYNC_CYC + V_SYNC_BACK + 100)       
-		& (V_Cont < V_SYNC_CYC + V_SYNC_BACK + V_SYNC_ACT - 100);   	
+obrazDlaProstokata =   (H_Cont > H_SYNC_CYC + H_SYNC_BACK + coordinates[2500:2495])       
+		& (H_Cont < H_SYNC_CYC + H_SYNC_BACK + H_SYNC_ACT - coordinates[2500:2495])  
+		& 			   (V_Cont > V_SYNC_CYC + V_SYNC_BACK + coordinates[2500:2495])       
+		& (V_Cont < V_SYNC_CYC + V_SYNC_BACK + V_SYNC_ACT - coordinates[2500:2495]);   	
 
-/*		
-obrazDlaPiksela = (H_Cont == 300)  	
-				  & (V_Cont == 300);
-
-*/
 coordinates[2888] <= 1;
+coordinates[2500:2495] <= 1;
+obrazDlaPoruszajacegoSiePiksela =   (H_Cont <= ValueChangeX + 5)
+								  & (H_Cont >= ValueChangeX - 4)
+								  & (V_Cont <= ValueChangeY + 5)
+								  & (V_Cont >= ValueChangeY - 4);
 
-obrazDlaPoruszajacegoSiePiksela =   (H_Cont <= ValueChangeX + 2)
-								  & (H_Cont >= ValueChangeX - 2)
-								  & (V_Cont <= ValueChangeY + 2)
-								  & (V_Cont >= ValueChangeY - 2);
 
 if( obrazDlaPoruszajacegoSiePiksela )
 begin
@@ -148,30 +144,30 @@ end																	// (jd)
 
 always@(posedge iPresClk)	
 begin
-		if (ValueChangeX > H_SYNC_CYC + H_SYNC_BACK + 5
-		& ValueChangeY > V_SYNC_CYC + V_SYNC_BACK + 5
-		& ValueChangeX < H_SYNC_CYC + H_SYNC_BACK + H_SYNC_ACT -5 
-		& ValueChangeY < V_SYNC_CYC + V_SYNC_BACK + V_SYNC_ACT -5)
+		if (ValueChangeX > H_SYNC_CYC + H_SYNC_BACK + 10
+		& ValueChangeY > V_SYNC_CYC + V_SYNC_BACK + 10
+		& ValueChangeX < H_SYNC_CYC + H_SYNC_BACK + H_SYNC_ACT -10 
+		& ValueChangeY < V_SYNC_CYC + V_SYNC_BACK + V_SYNC_ACT -10)
 		begin
 			case(direction)
 			2'b11:
 				begin
 				   ValueChangeX <= ValueChangeX;
-				   ValueChangeY <= ValueChangeY - 5;
+				   ValueChangeY <= ValueChangeY - 10;
 				end
 			2'b00:
 				begin
 				   ValueChangeX <= ValueChangeX;
-				   ValueChangeY <= ValueChangeY + 5;
+				   ValueChangeY <= ValueChangeY + 10;
 				end
 			2'b10:
 				begin
-				   ValueChangeX <= ValueChangeX - 5;
+				   ValueChangeX <= ValueChangeX - 10;
 				   ValueChangeY <= ValueChangeY;
 				end
 			2'b01:
 				begin
-				   ValueChangeX <= ValueChangeX + 5;
+				   ValueChangeX <= ValueChangeX + 10;
 				   ValueChangeY <= ValueChangeY;
 				end
 			endcase
