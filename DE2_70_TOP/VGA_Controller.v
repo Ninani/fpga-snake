@@ -153,8 +153,28 @@ begin
 		& ValueChangeX < H_SYNC_CYC + H_SYNC_BACK + H_SYNC_ACT -5 
 		& ValueChangeY < V_SYNC_CYC + V_SYNC_BACK + V_SYNC_ACT -5)
 		begin
-			ValueChangeX <= ValueChangeX + 5*upDownDirection;
-			ValueChangeY <= ValueChangeY + 5*leftRightDirection;
+			case(direction)
+			2'b11:
+				begin
+				   ValueChangeX <= ValueChangeX;
+				   ValueChangeY <= ValueChangeY - 5;
+				end
+			2'b00:
+				begin
+				   ValueChangeX <= ValueChangeX;
+				   ValueChangeY <= ValueChangeY + 5;
+				end
+			2'b10:
+				begin
+				   ValueChangeX <= ValueChangeX - 5;
+				   ValueChangeY <= ValueChangeY;
+				end
+			2'b01:
+				begin
+				   ValueChangeX <= ValueChangeX + 5;
+				   ValueChangeY <= ValueChangeY;
+				end
+			endcase
 		end
 		else
 		begin
@@ -246,35 +266,30 @@ end
 reg		[9:0]		R_R;
 reg		[9:0]		G_G;
 reg		[9:0]		B_B;
-reg		upDownDirection;
-reg		leftRightDirection;
+reg		[1:0] 		direction;
 
 
-always@(iUpButton or iLeftButton or iDownButton or iRightButton)
+always@(posedge iUpButton or posedge iLeftButton or posedge iDownButton or posedge iRightButton)
 begin
 	if(iUpButton)
 	begin
-		upDownDirection<=1;
-		leftRightDirection<=0;
+		direction<=2'b11;
 	end
 	else
 	begin
 	if(iDownButton)
 	begin
-		upDownDirection<=-1;
-		leftRightDirection<=0;
+		direction<=2'b00;
 	end
 	else
 	begin
 	if(iLeftButton)
 	begin
-		upDownDirection<=0;
-		leftRightDirection<=-1;
+		direction<=2'b10;
 	end
 	else
 	begin
-		upDownDirection<=0;
-		leftRightDirection<=1;
+		direction<=2'b01;
 	end	
 	end
 	end
