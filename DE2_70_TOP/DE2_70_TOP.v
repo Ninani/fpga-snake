@@ -459,6 +459,7 @@ PS2_Controller keyCtrl( .data(PS2_KBDAT),
 );
 */
 
+/*
 //PS2 keyboard test
 wire [7:0] key_code, ascii_code;
 wire kb_not_empty, kb_buf_empty;
@@ -474,6 +475,7 @@ Last_Key last_key_unit(
 	
 );
 
+
 Key_To_Led key_to_led_unit(
 	.key_code(key_code),
 	.led0(oLEDG[0]),
@@ -485,6 +487,8 @@ Key_To_Led key_to_led_unit(
 assign kb_not_empty = ~kb_buf_empty;
 
 //END keyboard test
+*/
+
 
 
 ////////////////////////////////////////

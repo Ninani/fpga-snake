@@ -8,6 +8,7 @@ module Key_To_Led
 );
 
 always @*
+
 	case(key_code)
 		8'h16: led0 <= 1;
 		8'h1e: led1 <= 1;
@@ -20,7 +21,6 @@ always @*
 			led2 <= 0;
 			led3 <= 0;
 		end
-		
 	endcase
 
 endmodule
