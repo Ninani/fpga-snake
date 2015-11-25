@@ -452,11 +452,39 @@ VGA_Controller	myCtrl(	.iRed(mVGA_R),
 						.iCLK(VGA_CTRL_CLK),
 						.iRST_N(DLY_RST)			
 					);
-					
+/*					
 PS2_Controller keyCtrl( .data(PS2_KBDAT),
 						.clk(PS2_KBCLK),
 						.led(oLEDG)
 );
+*/
+
+//PS2 keyboard test
+wire [7:0] key_code, ascii_code;
+wire kb_not_empty, kb_buf_empty;
+
+Last_Key last_key_unit(
+	.clk(iCLK_28),
+	.reset(),
+	.ps2data(),
+	.ps2clk(),
+	.rd_key_kode(kb_not_empty),
+	.key_code(key_code),
+	.kb_buf_empty(kb_buf_empty)
+	
+);
+
+Key_To_Led key_to_led_unit(
+	.key_code(key_code),
+	.led0(oLEDG[0]),
+	.led1(oLEDG[1]),
+	.led2(oLEDG[2]),
+	.led3(oLEDG[3])
+);
+
+assign kb_not_empty = ~kb_buf_empty;
+
+//END keyboard test
 
 
 ////////////////////////////////////////
