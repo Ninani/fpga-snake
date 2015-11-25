@@ -575,3 +575,5 @@ set_global_assignment -name QIP_FILE PLL.qip
 set_global_assignment -name VERILOG_FILE PS2_Controller.v
 set_global_assignment -name VERILOG_FILE Edge_Detect.v
 set_global_assignment -name VERILOG_FILE PS2_Receiver.v
+set_global_assignment -name VERILOG_FILE Last_Key.v
+set_global_assignment -name VERILOG_FILE Key_To_Led.v
