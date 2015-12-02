@@ -15,7 +15,12 @@ module	VGA_Controller(	//	Host Side
 						oVGA_CLOCK,
 						//	Control Signal
 						iCLK,
-						iRST_N	);
+						iRST_N,
+						iPresClk,
+						iUpButton,
+						iDownButton,
+						iLeftButton,
+						iRightButton,	);
 
 `include "VGA_Param.h"
 
@@ -37,6 +42,11 @@ output				oVGA_CLOCK;
 //	Control Signal
 input				iCLK;
 input				iRST_N;
+input				iPresClk;
+input				iUpButton;
+input				iDownButton;
+input				iLeftButton;
+input				iRightButton;
 
 //	Internal Registers and Wires
 reg		[9:0]		H_Cont;
@@ -45,11 +55,18 @@ reg		[9:0]		Cur_Color_R;
 reg		[9:0]		Cur_Color_G;
 reg		[9:0]		Cur_Color_B;
 reg					obraz;  			// (jd)
+reg					obrazDlaPiksela;  	
+reg			        obrazDlaProstokata;
+reg			        obrazDlaPoruszajacegoSiePiksela;
+reg		[9:0]		ValueChangeX;
+reg		[9:0]		ValueChangeY;
+reg		[3072:0]    coordinates;
 
 
 assign	oVGA_BLANK	=	oVGA_H_SYNC & oVGA_V_SYNC;
 assign	oVGA_SYNC	=	1'b0;
 assign	oVGA_CLOCK	=	iCLK;
+
 /*
 assign	oVGA_R	=	R_R;
 
@@ -78,20 +95,98 @@ oVGA_B	<=	10'b0000000000;										// (jd)
 		
 obraz =   (H_Cont > H_SYNC_CYC + H_SYNC_BACK)                	// (jd)
 		& (H_Cont < H_SYNC_CYC + H_SYNC_BACK + H_SYNC_ACT);  	// (jd)
+		
 
-if( obraz )// (jd)
-	oVGA_R	<=	10'b1111111111;									// (jd)
-	oVGA_G	<=	10'b0000000000;									// (jd)
-	oVGA_B	<=	10'b0000000000;									// (jd)
-end																// (jd)
+obrazDlaProstokata =   (H_Cont > H_SYNC_CYC + H_SYNC_BACK + coordinates[2500:2495])       
+		& (H_Cont < H_SYNC_CYC + H_SYNC_BACK + H_SYNC_ACT - coordinates[2500:2495])  
+		& 			   (V_Cont > V_SYNC_CYC + V_SYNC_BACK + coordinates[2500:2495])       
+		& (V_Cont < V_SYNC_CYC + V_SYNC_BACK + V_SYNC_ACT - coordinates[2500:2495]);   	
+
+coordinates[2888] <= 1;
+coordinates[2500:2495] <= 6'b111111;
+obrazDlaPoruszajacegoSiePiksela =   (H_Cont <= ValueChangeX + 5)
+								  & (H_Cont >= ValueChangeX - 4)
+								  & (V_Cont <= ValueChangeY + 5)
+								  & (V_Cont >= ValueChangeY - 4);
 
 
+if( obrazDlaPoruszajacegoSiePiksela )
+begin
+	oVGA_R	<=	10'b0000000000;								
+	oVGA_G	<=	10'b0000000000;								
+	oVGA_B	<=	10'b0000000000;						
+end
+else
+	/*if( obrazDlaPiksela )
+	begin
+		oVGA_R	<=	10'b0000000000;								
+		oVGA_G	<=	10'b0000000000;								
+		oVGA_B	<=	10'b1111111111;						
+	end
+	else*/
+		if( obrazDlaProstokata )
+		begin
+			oVGA_R	<=	10'b1111111111;								
+			oVGA_G	<=	10'b0000000000;								
+			oVGA_B	<=	10'b0000000000;								
+		end
+		else		
+		if( obraz )// (jd)
+		begin
+			oVGA_R	<=	10'b0000000000;									// (jd)
+			oVGA_G	<=	10'b1111111111;									// (jd)
+			oVGA_B	<=	10'b0000000000;									// (jd)
+		end
+end																	// (jd)
+///////////////////////////////////////////////////////////////////////////
+///////Drawing flying pixel////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////
 
+always@(posedge iPresClk)	
+begin
+		if (ValueChangeX > H_SYNC_CYC + H_SYNC_BACK + 10
+		& ValueChangeY > V_SYNC_CYC + V_SYNC_BACK + 10
+		& ValueChangeX < H_SYNC_CYC + H_SYNC_BACK + H_SYNC_ACT -10 
+		& ValueChangeY < V_SYNC_CYC + V_SYNC_BACK + V_SYNC_ACT -10)
+		begin
+			case(direction)
+			2'b11:
+				begin
+				   ValueChangeX <= ValueChangeX;
+				   ValueChangeY <= ValueChangeY - 10;
+				end
+			2'b00:
+				begin
+				   ValueChangeX <= ValueChangeX;
+				   ValueChangeY <= ValueChangeY + 10;
+				end
+			2'b10:
+				begin
+				   ValueChangeX <= ValueChangeX - 10;
+				   ValueChangeY <= ValueChangeY;
+				end
+			2'b01:
+				begin
+				   ValueChangeX <= ValueChangeX + 10;
+				   ValueChangeY <= ValueChangeY;
+				end
+			endcase
+		end
+		else
+		begin
+			ValueChangeX <= 10'b0100000000;
+			ValueChangeY <= 10'b0100000000;
+		end
+end
 
-
-
-
-
+always@(posedge iCLK)										
+begin			
+	
+end
+//dla ValueChangeX <= ValueChangeX + 1; to pokazuje sie 
+//taki szybki naprzemienny piorun z stojacego piksela w prawo i dol albo w lewo i dol
+//dla ValueChangeX <= ValueChangeX - 1; to pokazuje sie 
+//takie pare kropek latajace w prawo i dol
 
 
 //	Pixel LUT Address Generator
@@ -167,7 +262,34 @@ end
 reg		[9:0]		R_R;
 reg		[9:0]		G_G;
 reg		[9:0]		B_B;
+reg		[1:0] 		direction;
 
+
+always@(posedge iUpButton or posedge iLeftButton or posedge iDownButton or posedge iRightButton)
+begin
+	if(iUpButton)
+	begin
+		direction<=2'b11;
+	end
+	else
+	begin
+	if(iDownButton)
+	begin
+		direction<=2'b00;
+	end
+	else
+	begin
+	if(iLeftButton)
+	begin
+		direction<=2'b10;
+	end
+	else
+	begin
+		direction<=2'b01;
+	end	
+	end
+	end
+end
 
 
 /*

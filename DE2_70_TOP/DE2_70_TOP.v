@@ -61,11 +61,11 @@ module DE2_70_TOP
 		iCLK_50_4,						//	50 MHz
 		iEXT_CLOCK,						//	External Clock
 		////////////////////	Push Button		////////////////////
-		/*
+		
 		iKEY,							//	Pushbutton[3:0]
 		////////////////////	DPDT Switch		////////////////////
 		iSW,							//	Toggle Switch[17:0]
-		////////////////////	7-SEG Dispaly	////////////////////
+		/*////////////////////	7-SEG Dispaly	////////////////////
 		oHEX0_D,						//	Seven Segment Digit 0
 		oHEX0_DP,						//  Seven Segment Digit 0 decimal point
 		oHEX1_D,						//	Seven Segment Digit 1
@@ -246,11 +246,11 @@ input           iCLK_50_3;				//	50 MHz
 input           iCLK_50_4;				//	50 MHz
 input           iEXT_CLOCK;				//	External Clock
 ////////////////////////	Push Button		////////////////////////
-/*
+
 input	[3:0]	iKEY;					//	Pushbutton[3:0]
 ////////////////////////	DPDT Switch		////////////////////////
 input	[17:0]	iSW;					//	Toggle Switch[17:0]
-////////////////////////	7-SEG Dispaly	////////////////////////
+/*////////////////////////	7-SEG Dispaly	////////////////////////
 output	[6:0]	oHEX0_D;				//	Seven Segment Digit 0
 output			oHEX0_DP;				//  Seven Segment Digit 0 decimal point
 output	[6:0]	oHEX1_D;				//	Seven Segment Digit 1
@@ -435,6 +435,36 @@ Reset_Delay	r0	(	.iCLK(iCLK_50),.oRESET(DLY_RST)	);
 //From 50Hz to 25Hz
 PLL			p2	(.areset(~DLY_RST),.inclk0(iCLK_50),.c0(VGA_CTRL_CLK));
 
+wire	outerClk;			
+anim_prescaler	myPresc(		
+						.clkin(VGA_CTRL_CLK),
+						.clkout(outerClk)			
+					);
+wire	buttonUp;
+wire	buttonDown;	
+wire	buttonLeft;	
+wire	buttonRight;							
+debouncer buttonUpDebouncer(		
+						.button(iKEY[0]),
+						.clk(VGA_CTRL_CLK),	
+						.bt_act(buttonUp)			
+					);
+debouncer buttonDownDebouncer(		
+						.button(iKEY[1]),
+						.clk(VGA_CTRL_CLK),
+						.bt_act(buttonDown)			
+					);
+debouncer buttonLeftDebouncer(		
+						.button(iKEY[2]),
+						.clk(VGA_CTRL_CLK),	
+						.bt_act(buttonLeft)			
+					);
+debouncer buttonRightDebouncer(		
+						.button(iKEY[3]),
+						.clk(VGA_CTRL_CLK),	
+						.bt_act(buttonRight)			
+					);
+					
 VGA_Controller	myCtrl(	.iRed(mVGA_R),
 						.iGreen(mVGA_G),
 						.iBlue(mVGA_B),
@@ -450,10 +480,15 @@ VGA_Controller	myCtrl(	.iRed(mVGA_R),
 						.oVGA_CLOCK(oVGA_CLOCK),
 						
 						.iCLK(VGA_CTRL_CLK),
-						.iRST_N(DLY_RST)			
+						.iRST_N(DLY_RST),
+						.iPresClk(outerClk),			
+						
+						.iUpButton(buttonUp),
+						.iDownButton(buttonDown),
+						.iLeftButton(buttonLeft),
+						.iRightButton(buttonRight)
 					);
-					
-					
+
 PS2_Controller keyCtrl( .data(PS2_KBDAT),
 						.clk(PS2_KBCLK),
 						.led0(oLEDG[0]),
@@ -461,37 +496,6 @@ PS2_Controller keyCtrl( .data(PS2_KBDAT),
 						.led2(oLEDG[2]),
 						.led3(oLEDG[3])
 );
-
-
-/*
-//PS2 keyboard test
-wire [7:0] key_code, ascii_code;
-wire kb_not_empty, kb_buf_empty;
-
-Last_Key last_key_unit(
-	.clk(iCLK_28),
-	.reset(),
-	.ps2data(),
-	.ps2clk(),
-	.rd_key_kode(kb_not_empty),
-	.key_code(key_code),
-	.kb_buf_empty(kb_buf_empty)
-	
-);
-
-
-Key_To_Led key_to_led_unit(
-	.key_code(key_code),
-	.led0(oLEDG[0]),
-	.led1(oLEDG[1]),
-	.led2(oLEDG[2]),
-	.led3(oLEDG[3])
-);
-
-assign kb_not_empty = ~kb_buf_empty;
-
-//END keyboard test
-*/
 
 
 
