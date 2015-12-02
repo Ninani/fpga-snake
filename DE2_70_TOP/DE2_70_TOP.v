@@ -434,7 +434,7 @@ wire		DLY_RST;			//reset
 Reset_Delay	r0	(	.iCLK(iCLK_50),.oRESET(DLY_RST)	);
 //From 50Hz to 25Hz
 PLL			p2	(.areset(~DLY_RST),.inclk0(iCLK_50),.c0(VGA_CTRL_CLK));
-/*
+
 VGA_Controller	myCtrl(	.iRed(mVGA_R),
 						.iGreen(mVGA_G),
 						.iBlue(mVGA_B),
@@ -452,7 +452,7 @@ VGA_Controller	myCtrl(	.iRed(mVGA_R),
 						.iCLK(VGA_CTRL_CLK),
 						.iRST_N(DLY_RST)			
 					);
-					*/
+					
 					
 PS2_Controller keyCtrl( .data(PS2_KBDAT),
 						.clk(PS2_KBCLK),
