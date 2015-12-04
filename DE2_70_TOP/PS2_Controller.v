@@ -1,10 +1,10 @@
 module PS2_Controller(
 	input wire  data,				//	PS2 Keyboard Data
 	input wire clk,				//	PS2 Keyboard Clock
-	output reg led0,
-	output reg led1,
-	output reg led2,
-	output reg led3
+	output reg up,
+	output reg left,
+	output reg down,
+	output reg right
 );
 
 reg [7:0] current_data;
@@ -50,25 +50,25 @@ begin
 	if(current_data==8'hf0)
 		begin
 			if(previous_data == 8'h1D)//if 'W'
-				led0 <= 1;
+				up <= 1;
 			else if(previous_data == 8'h1C)//'A'
-				led1 <= 1;
+				left <= 1;
 			else if(previous_data == 8'h1B)//'S'
-				led2 <= 1;
+				down <= 1;
 			else if(previous_data == 8'h23)//'D'
-				led3 <= 1;
-		end		
+				right <= 1;
+		end	
+			
 	else
-	
 		begin
-			led0 <= 0;
-			led1 <= 0;
-			led2 <= 0;
-			led3 <= 0;
+			up <= 0;
+			left <= 0;
+			down <= 0;
+			right <= 0;
+			
+			previous_data<=current_data;
 		end
 		
-	
-		previous_data<=current_data;
 end
 
 endmodule

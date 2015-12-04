@@ -443,7 +443,8 @@ anim_prescaler	myPresc(
 wire	buttonUp;
 wire	buttonDown;	
 wire	buttonLeft;	
-wire	buttonRight;							
+wire	buttonRight;	
+/*						
 debouncer buttonUpDebouncer(		
 						.button(iKEY[0]),
 						.clk(VGA_CTRL_CLK),	
@@ -464,7 +465,7 @@ debouncer buttonRightDebouncer(
 						.clk(VGA_CTRL_CLK),	
 						.bt_act(buttonRight)			
 					);
-					
+*/					
 VGA_Controller	myCtrl(	.iRed(mVGA_R),
 						.iGreen(mVGA_G),
 						.iBlue(mVGA_B),
@@ -491,10 +492,10 @@ VGA_Controller	myCtrl(	.iRed(mVGA_R),
 
 PS2_Controller keyCtrl( .data(PS2_KBDAT),
 						.clk(PS2_KBCLK),
-						.led0(oLEDG[0]),
-						.led1(oLEDG[1]),
-						.led2(oLEDG[2]),
-						.led3(oLEDG[3])
+						.up(buttonUp),
+						.left(buttonLeft),
+						.down(buttonDown),
+						.right(buttonRight)
 );
 
 
