@@ -1,3 +1,6 @@
+`define BUF_WIDTH 13    // BUF_SIZE = 16 -> BUF_WIDTH = 4, no. of bits to be used in pointer
+`define BUF_SIZE ( 1<<`BUF_WIDTH )
+
 module	VGA_Controller(	//	Host Side
 						iRed,
 						iGreen,
@@ -60,9 +63,21 @@ reg			        obrazDlaProstokata;
 reg			        obrazDlaPoruszajacegoSiePiksela;
 reg		[9:0]		ValueChangeX;
 reg		[9:0]		ValueChangeY;
-reg		[3072:0]    coordinates;
+
+reg rst, wr_en, rd_en;
+wire buf_empty, buf_full;
+reg[13:0] buf_in;
+reg[13:0] tempdata;
+wire [13:0] buf_out;
+wire [13:0] fifo_counter;
 
 
+fifo ff( .clk(iCLK), .rst(rst), .buf_in(buf_in), .buf_out(buf_out), 
+         .wr_en(wr_en), .rd_en(rd_en), .buf_empty(buf_empty), 
+         .buf_full(buf_full), .fifo_counter(fifo_counter));
+
+
+integer i;
 assign	oVGA_BLANK	=	oVGA_H_SYNC & oVGA_V_SYNC;
 assign	oVGA_SYNC	=	1'b0;
 assign	oVGA_CLOCK	=	iCLK;
@@ -74,9 +89,37 @@ assign	oVGA_G	=	G_G;
 
 assign	oVGA_B	=	B_B;
 */
+/*
+function containsFunc;
+input[13:0] data; 
+begin
+    for( i = 0; i <= 10; i=i+1) 
+	begin
+		if( buf_mem[i] == data )
+			containsFunc = 1;
+	end
+	containsFunc = 0;
+end
+endfunction*/
+
+initial
+begin
+   rst = 1;
+        rd_en = 0;
+        wr_en = 0;
+        buf_in = 0;
 
 
-
+        #15 rst = 0;
+  
+        push(3231);
+        push(3232);
+        push(3233);
+        push(3234);
+        push(3235);
+        push(3236);
+        push(3237);
+end
 
 
 
@@ -102,11 +145,16 @@ obrazDlaProstokata =   (H_Cont > H_SYNC_CYC + H_SYNC_BACK + 100)
 		& 			   (V_Cont > V_SYNC_CYC + V_SYNC_BACK + 100)       
 		& (V_Cont < V_SYNC_CYC + V_SYNC_BACK + V_SYNC_ACT - 100);   	
 
-obrazDlaPoruszajacegoSiePiksela =   (H_Cont <= H_SYNC_CYC + H_SYNC_BACK + H_SYNC_ACT-50)
-								  & (H_Cont >= ValueChangeX + 10*coordinates[2500:2491]-50)
+obrazDlaPoruszajacegoSiePiksela =  (H_Cont > H_SYNC_CYC + H_SYNC_BACK)       
+		& (H_Cont < H_SYNC_CYC + H_SYNC_BACK + H_SYNC_ACT)  
+		& 			   (V_Cont > V_SYNC_CYC + V_SYNC_BACK)       
+		& (V_Cont < V_SYNC_CYC + V_SYNC_BACK + V_SYNC_ACT);
+		/*& containsFunc((H_Cont/10)*80 + V_Cont/10);*/
+/*
+(H_Cont <= ValueChangeX - 4)
+								  & (H_Cont >= ValueChangeX + 5)
 								  & (V_Cont <= ValueChangeY + 5)
-								  & (V_Cont >= ValueChangeY - 4);
-
+								  & (V_Cont >= ValueChangeY - 4);*/
 
 if( obrazDlaPoruszajacegoSiePiksela )
 begin
@@ -150,7 +198,6 @@ begin
 			case(direction)
 			2'b11:
 				begin
-				   coordinates[2500:2491] <= coordinates[2500:2491]-1;
 				   ValueChangeX <= ValueChangeX;
 				   ValueChangeY <= ValueChangeY - 10;
 				end
@@ -158,22 +205,16 @@ begin
 				begin
 				   ValueChangeX <= ValueChangeX;
 				   ValueChangeY <= ValueChangeY + 10;
-				   coordinates[2500:2491] <= coordinates[2500:2491]+1;
 				end
 			2'b10:
 				begin
 				   ValueChangeX <= ValueChangeX - 10;
 				   ValueChangeY <= ValueChangeY;
-				   coordinates[2500:2491] <= coordinates[2500:2491]-1;
 				end
 			2'b01:
 				begin
-					if((coordinates[2500:2491]+1)*10+ValueChangeX<H_SYNC_CYC + H_SYNC_BACK + H_SYNC_ACT -10)
-					begin
-						coordinates[2500:2491] <= coordinates[2500:2491]+1;
-						ValueChangeX <= ValueChangeX + 10;
-						ValueChangeY <= ValueChangeY;
-					end
+					ValueChangeX <= ValueChangeX + 10;
+					ValueChangeY <= ValueChangeY;
 				end
 			endcase
 		end
@@ -212,7 +253,6 @@ begin
 		end
 	end
 end
-
 
 //	H_Sync Generator, Ref. 25.175 MHz Clock
 always@(posedge iCLK or negedge iRST_N)
@@ -313,6 +353,40 @@ end
 */
 
 
+task push;
+input[12:0] data;
+
+
+   if( buf_full )
+            $display("---Cannot push: Buffer Full---");
+        else
+        begin
+           $display("Pushed ",data );
+           buf_in = data;
+           wr_en = 1;
+                @(posedge iCLK);
+                #1 wr_en = 0;
+        end
+
+endtask
+
+task pop;
+output [12:0] data;
+
+   if( buf_empty )
+            $display("---Cannot Pop: Buffer Empty---");
+   else
+        begin
+
+     rd_en = 1;
+          @(posedge iCLK);
+
+          #1 rd_en = 0;
+          data = buf_out;
+           $display("-------------------------------Poped ", data);
+
+        end
+endtask
 
 
 endmodule
