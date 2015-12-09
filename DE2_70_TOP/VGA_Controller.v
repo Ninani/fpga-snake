@@ -127,6 +127,11 @@ begin
         push(3235);
         push(3236);
         push(3237);
+        
+        buf_mem[0] = 3231;
+        buf_mem[1] = 3232;
+        buf_mem[2] = 3233;
+        buf_mem[3] = 3234;
 end
 
 
@@ -153,7 +158,7 @@ obrazDlaProstokata =   (H_Cont > H_SYNC_CYC + H_SYNC_BACK + 100)
 		& 			   (V_Cont > V_SYNC_CYC + V_SYNC_BACK + 100)       
 		& (V_Cont < V_SYNC_CYC + V_SYNC_BACK + V_SYNC_ACT - 100);   	
 
-data = (H_Cont/10)*80 + V_Cont/10;
+dataToCheck = (H_Cont/10)*80 + V_Cont/10;
 containsTask();
 obrazDlaPoruszajacegoSiePiksela =  (H_Cont > H_SYNC_CYC + H_SYNC_BACK)       
 		& (H_Cont < H_SYNC_CYC + H_SYNC_BACK + H_SYNC_ACT)  
@@ -393,7 +398,7 @@ output [13:0] data;
    end
 endtask
 
-reg data;
+reg dataToCheck;
 
 task containsTask;
 	check = 0;
@@ -491,7 +496,7 @@ begin
 	if( i==1000)
 		i=0;
 		i = i+1;
-	   if(buf_mem[i] == data)
+	   if(buf_mem[i] == dataToCheck)
 		  check=1;
 end
 /*
