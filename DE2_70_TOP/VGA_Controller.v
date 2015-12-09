@@ -389,4 +389,40 @@ output [12:0] data;
 endtask
 
 
+//food generator
+reg [5:0] xFood;
+reg [5:0] yFood;
+reg foodOnBoard;
+
+wire [5:0] xRand;
+wire [5:0] yRand;
+
+LFSR lfsr( 
+	.clk1(iCLK),
+	.clk2(iPresClk),
+	.rst_n(iRST_N),
+	.XCoord(xRand),
+	.YCoord(yRand)
+			
+);
+
+always @(posedge iCLK)
+begin
+	foodOnBoard <= 0;
+	if(!foodOnBoard) 
+	begin
+		xFood <= xRand;
+		yFood <= yRand;
+		foodOnBoard <= 1;
+	end
+	if(yFood>47) yFood <= yRand;
+end
+
+//display food
+
+
+
+//END food generator
+
+
 endmodule

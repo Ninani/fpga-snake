@@ -585,3 +585,5 @@ set_global_assignment -name VERILOG_FILE PS2_Receiver.v
 set_global_assignment -name VERILOG_FILE Last_Key.v
 set_global_assignment -name VERILOG_FILE Key_To_Led.v
 set_global_assignment -name VERILOG_FILE Rand_Number_Generator.v
+set_global_assignment -name VERILOG_FILE Random_Generator.v
+set_global_assignment -name VERILOG_FILE LFSR.v
