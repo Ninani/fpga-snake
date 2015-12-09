@@ -63,18 +63,26 @@ reg			        obrazDlaProstokata;
 reg			        obrazDlaPoruszajacegoSiePiksela;
 reg		[9:0]		ValueChangeX;
 reg		[9:0]		ValueChangeY;
-
+/*
 reg rst, wr_en, rd_en;
 wire buf_empty, buf_full;
 reg[13:0] buf_in;
 reg[13:0] tempdata;
 wire [13:0] buf_out;
 wire [13:0] fifo_counter;
+*/
 
+reg rst, wr_en, rd_en;
+reg buf_empty, buf_full;
+reg[13:0] buf_in;
+reg [13:0] buf_out;
+reg [13:0] fifo_counter;
+reg check;
 
+/*
 fifo ff( .clk(iCLK), .rst(rst), .buf_in(buf_in), .buf_out(buf_out), 
          .wr_en(wr_en), .rd_en(rd_en), .buf_empty(buf_empty), 
-         .buf_full(buf_full), .fifo_counter(fifo_counter));
+         .buf_full(buf_full), .fifo_counter(fifo_counter));*/
 
 
 integer i;
@@ -145,11 +153,15 @@ obrazDlaProstokata =   (H_Cont > H_SYNC_CYC + H_SYNC_BACK + 100)
 		& 			   (V_Cont > V_SYNC_CYC + V_SYNC_BACK + 100)       
 		& (V_Cont < V_SYNC_CYC + V_SYNC_BACK + V_SYNC_ACT - 100);   	
 
+data = (H_Cont/10)*80 + V_Cont/10;
+containsTask();
 obrazDlaPoruszajacegoSiePiksela =  (H_Cont > H_SYNC_CYC + H_SYNC_BACK)       
 		& (H_Cont < H_SYNC_CYC + H_SYNC_BACK + H_SYNC_ACT)  
 		& 			   (V_Cont > V_SYNC_CYC + V_SYNC_BACK)       
-		& (V_Cont < V_SYNC_CYC + V_SYNC_BACK + V_SYNC_ACT);
-		/*& containsFunc((H_Cont/10)*80 + V_Cont/10);*/
+		& (V_Cont < V_SYNC_CYC + V_SYNC_BACK + V_SYNC_ACT)
+		& check;
+
+check = 0;
 /*
 (H_Cont <= ValueChangeX - 4)
 								  & (H_Cont >= ValueChangeX + 5)
@@ -354,39 +366,145 @@ end
 
 
 task push;
-input[12:0] data;
+input[13:0] data;
 
 
-   if( buf_full )
-            $display("---Cannot push: Buffer Full---");
-        else
-        begin
-           $display("Pushed ",data );
+   if( ! buf_full )
+   begin
            buf_in = data;
            wr_en = 1;
                 @(posedge iCLK);
                 #1 wr_en = 0;
-        end
-
+   end
 endtask
 
 task pop;
-output [12:0] data;
+output [13:0] data;
 
-   if( buf_empty )
-            $display("---Cannot Pop: Buffer Empty---");
-   else
-        begin
+   if( ! buf_empty )
+   begin
 
      rd_en = 1;
           @(posedge iCLK);
 
           #1 rd_en = 0;
           data = buf_out;
-           $display("-------------------------------Poped ", data);
 
-        end
+   end
+endtask
+
+reg data;
+
+task containsTask;
+	check = 0;
+	#10000 rd_en = 0;
 endtask
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+reg[`BUF_WIDTH -1:0]  rd_ptr, wr_ptr;           // pointer to read and write addresses  
+reg[13:0]              buf_mem[`BUF_SIZE -1 : 0]; //  
+
+always @(fifo_counter)
+begin
+   buf_empty = (fifo_counter==0);
+   buf_full = (fifo_counter== `BUF_SIZE);
+end
+
+always @(posedge iCLK or posedge rst)
+begin
+   if( rst )
+       fifo_counter <= 0;
+
+   else if( (!buf_full && wr_en) && ( !buf_empty && rd_en ) )
+       fifo_counter <= fifo_counter;
+
+   else if( !buf_full && wr_en )
+       fifo_counter <= fifo_counter + 1;
+
+   else if( !buf_empty && rd_en )
+       fifo_counter <= fifo_counter - 1;
+   else
+      fifo_counter <= fifo_counter;
+end
+
+always @( posedge iCLK or posedge rst)
+begin
+   if( rst )
+      buf_out <= 0;
+   else
+   begin
+      if( rd_en && !buf_empty )
+         buf_out <= buf_mem[rd_ptr];
+
+      else
+         buf_out <= buf_out;
+
+   end
+end
+
+always @(posedge iCLK)
+begin
+
+   if( wr_en && !buf_full )
+      buf_mem[ wr_ptr ] <= buf_in;
+
+   else
+      buf_mem[ wr_ptr ] <= buf_mem[ wr_ptr ];
+end
+
+always@(posedge iCLK or posedge rst)
+begin
+   if( rst )
+   begin
+      wr_ptr <= 0;
+      rd_ptr <= 0;
+   end
+   else
+   begin
+      if( !buf_full && wr_en )    wr_ptr <= wr_ptr + 1;
+          else  wr_ptr <= wr_ptr;
+
+      if( !buf_empty && rd_en )   rd_ptr <= rd_ptr + 1;
+      else rd_ptr <= rd_ptr;
+   end
+
+end
+/////////////////////////////////////////////////////////////
+always @(posedge iCLK)
+begin
+	if( i==1000)
+		i=0;
+		i = i+1;
+	   if(buf_mem[i] == data)
+		  check=1;
+end
+/*
+function containsFunc;
+input[13:0] data; 
+begin
+    for( i = 0; i <= 1<<13; i=i+1) 
+	begin
+		if( buf_mem[i] == data )
+			containsFunc = 1;
+	end
+	containsFunc = 0;
+end
+endfunction
+*/
 endmodule
