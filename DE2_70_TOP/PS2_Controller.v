@@ -18,6 +18,10 @@ begin
 	flag<=1'b0;
 	current_data<=8'hf0;
 	previous_data<=8'hf0;
+	up <= 0;
+	down <= 0;
+	left <= 0;
+	right <= 0;
 	
 end
 
