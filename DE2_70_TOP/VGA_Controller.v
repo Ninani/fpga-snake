@@ -63,6 +63,7 @@ reg			        obrazDlaProstokata;
 reg			        obrazDlaPoruszajacegoSiePiksela;
 reg		[9:0]		ValueChangeX;
 reg		[9:0]		ValueChangeY;
+reg 	[9:0]		dataToCheck;
 /*
 reg rst, wr_en, rd_en;
 wire buf_empty, buf_full;
@@ -77,38 +78,13 @@ reg buf_empty, buf_full;
 reg[13:0] buf_in;
 reg [13:0] buf_out;
 reg [13:0] fifo_counter;
-reg check;
-
-/*
-fifo ff( .clk(iCLK), .rst(rst), .buf_in(buf_in), .buf_out(buf_out), 
-         .wr_en(wr_en), .rd_en(rd_en), .buf_empty(buf_empty), 
-         .buf_full(buf_full), .fifo_counter(fifo_counter));*/
-
+reg [2:0] check;
 
 integer i;
 assign	oVGA_BLANK	=	oVGA_H_SYNC & oVGA_V_SYNC;
 assign	oVGA_SYNC	=	1'b0;
 assign	oVGA_CLOCK	=	iCLK;
 
-/*
-assign	oVGA_R	=	R_R;
-
-assign	oVGA_G	=	G_G;
-
-assign	oVGA_B	=	B_B;
-*/
-/*
-function containsFunc;
-input[13:0] data; 
-begin
-    for( i = 0; i <= 10; i=i+1) 
-	begin
-		if( buf_mem[i] == data )
-			containsFunc = 1;
-	end
-	containsFunc = 0;
-end
-endfunction*/
 
 initial
 begin
@@ -120,18 +96,17 @@ begin
 
         #15 rst = 0;
   
-        push(3231);
-        push(3232);
-        push(3233);
-        push(3234);
-        push(3235);
-        push(3236);
-        push(3237);
+        push(3238);
+        push(3239);
+        push(3240);
+        push(3241);
+        push(3242);
         
         buf_mem[0] = 3231;
         buf_mem[1] = 3232;
         buf_mem[2] = 3233;
         buf_mem[3] = 3234;
+        check = 0;
 end
 
 
@@ -164,9 +139,7 @@ obrazDlaPoruszajacegoSiePiksela =  (H_Cont > H_SYNC_CYC + H_SYNC_BACK)
 		& (H_Cont < H_SYNC_CYC + H_SYNC_BACK + H_SYNC_ACT)  
 		& 			   (V_Cont > V_SYNC_CYC + V_SYNC_BACK)       
 		& (V_Cont < V_SYNC_CYC + V_SYNC_BACK + V_SYNC_ACT)
-		& check;
-
-check = 0;
+		& check == 1;
 /*
 (H_Cont <= ValueChangeX - 4)
 								  & (H_Cont >= ValueChangeX + 5)
@@ -191,7 +164,7 @@ else
 		begin
 			oVGA_R	<=	10'b1111111111;								
 			oVGA_G	<=	10'b0000000000;								
-			oVGA_B	<=	10'b0000000000;								
+			oVGA_B	<=	10'b0000000000;		
 		end
 		else		
 		if( obraz )// (jd)
@@ -398,11 +371,13 @@ output [13:0] data;
    end
 endtask
 
-reg dataToCheck;
+
 
 task containsTask;
-	check = 0;
-	#10000 rd_en = 0;
+	check <= 0;
+	for(i = 0;i<100;i = i+1)
+		if(buf_mem[i] == dataToCheck)
+			  check<=1;
 endtask
 
 
@@ -423,7 +398,7 @@ endtask
 
 
 reg[`BUF_WIDTH -1:0]  rd_ptr, wr_ptr;           // pointer to read and write addresses  
-reg[13:0]              buf_mem[`BUF_SIZE -1 : 0]; //  
+reg[13:0]              buf_mem[200: 0]; //  
 
 always @(fifo_counter)
 begin
@@ -490,15 +465,18 @@ begin
    end
 
 end
-/////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////
+/*
 always @(posedge iCLK)
 begin
+	check<=0;
 	if( i==1000)
 		i=0;
-		i = i+1;
+	i = i+1;
 	   if(buf_mem[i] == dataToCheck)
-		  check=1;
+		  check<=1;
 end
+*/
 /*
 function containsFunc;
 input[13:0] data; 
