@@ -64,6 +64,7 @@ reg			        obrazDlaPoruszajacegoSiePiksela;
 reg		[9:0]		ValueChangeX;
 reg		[9:0]		ValueChangeY;
 reg 	[9:0]		dataToCheck;
+reg[13:0]              buf_mem[200: 0]; //  
 /*
 reg rst, wr_en, rd_en;
 wire buf_empty, buf_full;
@@ -85,22 +86,22 @@ assign	oVGA_BLANK	=	oVGA_H_SYNC & oVGA_V_SYNC;
 assign	oVGA_SYNC	=	1'b0;
 assign	oVGA_CLOCK	=	iCLK;
 
-
+/*
 initial
 begin
+/*
    rst = 1;
         rd_en = 0;
         wr_en = 0;
-        buf_in = 0;
-
-
-        #15 rst = 0;
+        buf_in = 0;*/
   /*
         push(3238);
         push(3239);
         push(3240);
         push(3241);
-        push(3242);*/
+        push(3242);
+        for(i = 0;i<140;i = i+1)
+			buf_mem[i] = 0;
         
         buf_mem[0] = 3231;
         buf_mem[1] = 3232;
@@ -109,7 +110,7 @@ begin
         check = 0;
 end
 
-
+*/
 
 
 //assign	oVGA_R	=	10'b1111111111;   						// (jd)
@@ -119,7 +120,13 @@ end
 
 always@(posedge iCLK)											// (jd)
 begin															// (jd)
-
+        for(i = 0;i<140;i = i+1)
+			buf_mem[i] = 0;
+		
+		buf_mem[0] = 3231;
+        buf_mem[1] = 3232;
+        buf_mem[2] = 3233;
+        buf_mem[3] = 3234;
 oVGA_R	<=	10'b0000000000;										// (jd)
 oVGA_G	<=	10'b0000000000;										// (jd)
 oVGA_B	<=	10'b0000000000;										// (jd)
@@ -135,10 +142,15 @@ obrazDlaProstokata =   (H_Cont > H_SYNC_CYC + H_SYNC_BACK + 100)
 
 dataToCheck = (H_Cont/10)*80 + V_Cont/10;
 //containsTask();
-	check <= 0;
-	for(i = 0;i<100;i = i+1)
-		if(buf_mem[i] == dataToCheck)
-			  check<=1;
+check = 0;
+for(i = 0;i<150;i = i+1)
+begin
+	if(buf_mem[i] == dataToCheck)
+	begin
+		  check=1;
+	end
+end
+			  
 obrazDlaPoruszajacegoSiePiksela =  (H_Cont > H_SYNC_CYC + H_SYNC_BACK)       
 		& (H_Cont < H_SYNC_CYC + H_SYNC_BACK + H_SYNC_ACT)  
 		& 			   (V_Cont > V_SYNC_CYC + V_SYNC_BACK)       
@@ -345,7 +357,7 @@ begin
 				?	Cur_Color_B	:	0;
 end
 */
-
+/*
 
 task push;
 input[13:0] data;
@@ -387,7 +399,7 @@ endtask
 
 
 
-
+/*
 
 
 
@@ -468,7 +480,7 @@ begin
       else rd_ptr <= rd_ptr;
    end
 
-end
+end*/
 //////////////////////////////////////////////////////////////
 /*
 always @(posedge iCLK)
