@@ -95,12 +95,12 @@ begin
 
 
         #15 rst = 0;
-  
+  /*
         push(3238);
         push(3239);
         push(3240);
         push(3241);
-        push(3242);
+        push(3242);*/
         
         buf_mem[0] = 3231;
         buf_mem[1] = 3232;
@@ -134,7 +134,11 @@ obrazDlaProstokata =   (H_Cont > H_SYNC_CYC + H_SYNC_BACK + 100)
 		& (V_Cont < V_SYNC_CYC + V_SYNC_BACK + V_SYNC_ACT - 100);   	
 
 dataToCheck = (H_Cont/10)*80 + V_Cont/10;
-containsTask();
+//containsTask();
+	check <= 0;
+	for(i = 0;i<100;i = i+1)
+		if(buf_mem[i] == dataToCheck)
+			  check<=1;
 obrazDlaPoruszajacegoSiePiksela =  (H_Cont > H_SYNC_CYC + H_SYNC_BACK)       
 		& (H_Cont < H_SYNC_CYC + H_SYNC_BACK + H_SYNC_ACT)  
 		& 			   (V_Cont > V_SYNC_CYC + V_SYNC_BACK)       
@@ -372,14 +376,14 @@ output [13:0] data;
 endtask
 
 
-
+/*
 task containsTask;
 	check <= 0;
 	for(i = 0;i<100;i = i+1)
 		if(buf_mem[i] == dataToCheck)
 			  check<=1;
 endtask
-
+*/
 
 
 
