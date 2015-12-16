@@ -63,7 +63,9 @@ reg			        obrazDlaProstokata;
 reg			        obrazDlaPoruszajacegoSiePiksela;
 reg		[9:0]		ValueChangeX;
 reg		[9:0]		ValueChangeY;
-reg 	[9:0]		dataToCheck;
+reg 	[13:0]		dataToCheck;
+reg 	[13:0]		swapValue;
+
 reg[13:0]              buf_mem[200: 0]; //  
 /*
 reg rst, wr_en, rd_en;
@@ -82,11 +84,12 @@ reg [13:0] fifo_counter;
 reg [2:0] check;
 
 integer i;
+integer j;
 assign	oVGA_BLANK	=	oVGA_H_SYNC & oVGA_V_SYNC;
 assign	oVGA_SYNC	=	1'b0;
 assign	oVGA_CLOCK	=	iCLK;
 
-/*
+
 initial
 begin
 /*
@@ -94,23 +97,23 @@ begin
         rd_en = 0;
         wr_en = 0;
         buf_in = 0;*/
-  /*
-        push(3238);
-        push(3239);
-        push(3240);
-        push(3241);
-        push(3242);
-        for(i = 0;i<140;i = i+1)
+  
+    for(i = 0;i<140;i = i+1)
 			buf_mem[i] = 0;
+    
+     
         
         buf_mem[0] = 3231;
         buf_mem[1] = 3232;
         buf_mem[2] = 3233;
         buf_mem[3] = 3234;
+        buf_mem[4] = 3235;
+        buf_mem[5] = 3236;
+        buf_mem[6] = 3237;
         check = 0;
 end
 
-*/
+
 
 
 //assign	oVGA_R	=	10'b1111111111;   						// (jd)
@@ -120,13 +123,7 @@ end
 
 always@(posedge iCLK)											// (jd)
 begin															// (jd)
-        for(i = 0;i<140;i = i+1)
-			buf_mem[i] = 0;
-		
-		buf_mem[0] = 3231;
-        buf_mem[1] = 3232;
-        buf_mem[2] = 3233;
-        buf_mem[3] = 3234;
+
 oVGA_R	<=	10'b0000000000;										// (jd)
 oVGA_G	<=	10'b0000000000;										// (jd)
 oVGA_B	<=	10'b0000000000;										// (jd)
@@ -141,9 +138,10 @@ obrazDlaProstokata =   (H_Cont > H_SYNC_CYC + H_SYNC_BACK + 100)
 		& (V_Cont < V_SYNC_CYC + V_SYNC_BACK + V_SYNC_ACT - 100);   	
 
 dataToCheck = (H_Cont/10)*80 + V_Cont/10;
+//dataToCheck = (H_Cont/10)*80 + V_Cont/10;;
 //containsTask();
 check = 0;
-for(i = 0;i<150;i = i+1)
+for(i = 0;i<50;i = i+1)
 begin
 	if(buf_mem[i] == dataToCheck)
 	begin
@@ -196,38 +194,57 @@ end																	// (jd)
 
 always@(posedge iPresClk)	
 begin
-		if (ValueChangeX > H_SYNC_CYC + H_SYNC_BACK + 10
-		& ValueChangeY > V_SYNC_CYC + V_SYNC_BACK + 10
-		& ValueChangeX < H_SYNC_CYC + H_SYNC_BACK + H_SYNC_ACT -10 
-		& ValueChangeY < V_SYNC_CYC + V_SYNC_BACK + V_SYNC_ACT -10)
+		if ((buf_mem[0]/80)*10 > H_SYNC_CYC + H_SYNC_BACK + 50
+		& (buf_mem[0]%80)*10 > V_SYNC_CYC + V_SYNC_BACK + 50
+		& (buf_mem[0]/80)*10 < H_SYNC_CYC + H_SYNC_BACK + H_SYNC_ACT -50 
+		& (buf_mem[0]%80)*10 < V_SYNC_CYC + V_SYNC_BACK + V_SYNC_ACT -50)
 		begin
 			case(direction)
 			2'b11:
 				begin
-				   ValueChangeX <= ValueChangeX;
-				   ValueChangeY <= ValueChangeY - 10;
+				   //ValueChangeX <= ValueChangeX;
+				   //ValueChangeY <= ValueChangeY - 10;
+				   
+				   for(j=6;j>0;j=j-1)
+						buf_mem[j] = buf_mem[j-1]; 
+					
+					buf_mem[0] = buf_mem[0]-1; 
 				end
 			2'b00:
 				begin
-				   ValueChangeX <= ValueChangeX;
-				   ValueChangeY <= ValueChangeY + 10;
+				   //ValueChangeX <= ValueChangeX;
+				   //ValueChangeY <= ValueChangeY + 10;
+				    for(j=6;j>0;j=j-1)
+						buf_mem[j] = buf_mem[j-1]; 
+					
+					buf_mem[0] = buf_mem[0]+1; 
 				end
 			2'b10:
 				begin
-				   ValueChangeX <= ValueChangeX - 10;
-				   ValueChangeY <= ValueChangeY;
+				   //ValueChangeX <= ValueChangeX - 10;
+				   //ValueChangeY <= ValueChangeY;
+				    for(j=6;j>0;j=j-1)
+						buf_mem[j] = buf_mem[j-1]; 
+					
+					buf_mem[0] = buf_mem[0]-80; 
 				end
 			2'b01:
 				begin
-					ValueChangeX <= ValueChangeX + 10;
-					ValueChangeY <= ValueChangeY;
+					//ValueChangeX <= ValueChangeX + 10;
+					//ValueChangeY <= ValueChangeY;
+					 for(j=6;j>0;j=j-1)
+						buf_mem[j] = buf_mem[j-1]; 
+				
+					buf_mem[0] = buf_mem[0]+80; 
 				end
 			endcase
 		end
 		else
 		begin
-			ValueChangeX <= 10'b0100000000;
-			ValueChangeY <= 10'b0100000000;
+			//ValueChangeX <= 10'b0100000000;
+			//ValueChangeY <= 10'b0100000000;
+			for(j=0;j<6;j=j+1)
+				buf_mem[j] =3231+j;;
 		end
 end
 
@@ -357,8 +374,8 @@ begin
 				?	Cur_Color_B	:	0;
 end
 */
-/*
 
+/*
 task push;
 input[13:0] data;
 
