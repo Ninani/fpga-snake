@@ -481,14 +481,34 @@ VGA_Controller	myCtrl(	.iRed(mVGA_R),
 						.oVGA_CLOCK(oVGA_CLOCK),
 						
 						.iCLK(VGA_CTRL_CLK),
+
 						.iRST_N(DLY_RST),
 						.iPresClk(outerClk),			
 						
 						.iUpButton(buttonUp),
 						.iDownButton(buttonDown),
 						.iLeftButton(buttonLeft),
-						.iRightButton(buttonRight)
+						.iRightButton(buttonRight),
+						.foodX(x),
+						.foodY(y),
+						.foodClk(foodClk)						
 					);
+
+wire [9:0] x;
+wire [9:0] y;
+wire foodClk;					
+
+					
+Food_Prescaler(	.clkin(iCLK_50_2),
+				.clkout(foodClk)
+);
+
+LFSR random (	.clk1(iCLK_28),
+				.clk2(iCLK_50),
+				.rst_n(DLY_RST),
+				.XCoord(x),
+				.YCoord(y)
+);
 
 PS2_Controller keyCtrl( .data(PS2_KBDAT),
 						.clk(PS2_KBCLK),

@@ -568,9 +568,15 @@ set_global_assignment -name CYCLONEII_RESERVE_NCEO_AFTER_CONFIGURATION "USE AS R
 set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
 set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
 set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
+set_global_assignment -name MISC_FILE "C:/Users/Anna/Desktop/snake_mikro_3/DE2_70_TOP/DE2_70_TOP.dpf"
+set_global_assignment -name VERILOG_FILE anim_prescaler.v
+set_global_assignment -name VERILOG_FILE DE2_70_TOP.v
+set_global_assignment -name VERILOG_FILE debouncer.v
+set_global_assignment -name VERILOG_FILE PLL_bb.v
+set_global_assignment -name VERILOG_FILE Reset_Delay.v
+set_global_assignment -name SOURCE_FILE VGA_Param.h
 set_global_assignment -name VERILOG_FILE VGA_Controller.v
 set_global_assignment -name VERILOG_FILE PLL.v
-set_global_assignment -name MISC_FILE "C:/Users/Anna/Desktop/snake_mikro_3/DE2_70_TOP/DE2_70_TOP.dpf"
 set_global_assignment -name QIP_FILE PLL.qip
 set_global_assignment -name IP_TOOL_NAME ALTPLL -qip PLL.qip
 set_global_assignment -name IP_TOOL_VERSION 9.0 -qip PLL.qip
@@ -579,11 +585,6 @@ set_global_assignment -name MISC_FILE PLL_bb.v -qip PLL.qip
 set_global_assignment -name MISC_FILE PLL.ppf -qip PLL.qip
 set_global_assignment -name VERILOG_FILE fifo.v
 set_global_assignment -name SYSTEMVERILOG_FILE fifo.sv
+set_global_assignment -name VECTOR_WAVEFORM_FILE debugger.vwf
+set_global_assignment -name INCREMENTAL_VECTOR_INPUT_SOURCE debugger.vwf
 set_global_assignment -name VERILOG_FILE PS2_Controller.v
-set_global_assignment -name VERILOG_FILE Edge_Detect.v
-set_global_assignment -name VERILOG_FILE PS2_Receiver.v
-set_global_assignment -name VERILOG_FILE Last_Key.v
-set_global_assignment -name VERILOG_FILE Key_To_Led.v
-set_global_assignment -name VERILOG_FILE Rand_Number_Generator.v
-set_global_assignment -name VERILOG_FILE Random_Generator.v
-set_global_assignment -name VERILOG_FILE LFSR.v
