@@ -23,7 +23,11 @@ module	VGA_Controller(	//	Host Side
 						iUpButton,
 						iDownButton,
 						iLeftButton,
-						iRightButton,	);
+						iRightButton,	
+						foodX,
+						foodY,
+						foodClk
+						);
 
 `include "VGA_Param.h"
 
@@ -45,6 +49,7 @@ output				oVGA_CLOCK;
 //	Control Signal
 input				iCLK;
 input				iRST_N;
+input				foodClk;
 input				iPresClk;
 input				iUpButton;
 input				iDownButton;
@@ -89,6 +94,13 @@ assign	oVGA_BLANK	=	oVGA_H_SYNC & oVGA_V_SYNC;
 assign	oVGA_SYNC	=	1'b0;
 assign	oVGA_CLOCK	=	iCLK;
 
+reg					background; 
+reg					food;
+input [9:0]			foodX; 
+input [9:0]			foodY;
+reg		[9:0]		foodValueX;
+reg		[9:0]		foodValueY;
+
 
 initial
 begin
@@ -116,26 +128,20 @@ end
 
 
 
-//assign	oVGA_R	=	10'b1111111111;   						// (jd)
-//assign	oVGA_G	=	10'b0000000000;   						// (jd)
-//assign	oVGA_B	=	10'b0000000000;  					 	// (jd)
-
-
 always@(posedge iCLK)											// (jd)
 begin															// (jd)
 
-oVGA_R	<=	10'b0000000000;										// (jd)
-oVGA_G	<=	10'b0000000000;										// (jd)
-oVGA_B	<=	10'b0000000000;										// (jd)
-		
-obraz =   (H_Cont > H_SYNC_CYC + H_SYNC_BACK)                	// (jd)
-		& (H_Cont < H_SYNC_CYC + H_SYNC_BACK + H_SYNC_ACT);  	// (jd)
-		
-
-obrazDlaProstokata =   (H_Cont > H_SYNC_CYC + H_SYNC_BACK + 100)       
-		& (H_Cont < H_SYNC_CYC + H_SYNC_BACK + H_SYNC_ACT - 100)  
-		& 			   (V_Cont > V_SYNC_CYC + V_SYNC_BACK + 100)       
-		& (V_Cont < V_SYNC_CYC + V_SYNC_BACK + V_SYNC_ACT - 100);   	
+	oVGA_R	<=	10'b0000000000;										// (jd)
+	oVGA_G	<=	10'b0000000000;										// (jd)
+	oVGA_B	<=	10'b0000000000;										// (jd)
+			
+	background =   (H_Cont > H_SYNC_CYC + H_SYNC_BACK)                	// (jd)
+			& (H_Cont < H_SYNC_CYC + H_SYNC_BACK + H_SYNC_ACT);  	// (jd)
+			
+	food = (H_Cont <= foodValueX  + 5)       
+		& (H_Cont >= foodValueX - 5)  
+		& (V_Cont <= foodValueY + 5)       
+		& (V_Cont >= foodValueY - 5); 	
 
 dataToCheck = (H_Cont/10)*80 + V_Cont/10;
 //dataToCheck = (H_Cont/10)*80 + V_Cont/10;;
@@ -174,19 +180,20 @@ else
 		oVGA_B	<=	10'b1111111111;						
 	end
 	else*/
-		if( obrazDlaProstokata )
-		begin
-			oVGA_R	<=	10'b1111111111;								
-			oVGA_G	<=	10'b0000000000;								
-			oVGA_B	<=	10'b0000000000;		
-		end
-		else		
-		if( obraz )// (jd)
-		begin
-			oVGA_R	<=	10'b0000000000;									// (jd)
-			oVGA_G	<=	10'b1111111111;									// (jd)
-			oVGA_B	<=	10'b0000000000;									// (jd)
-		end
+			
+			if(food)
+			begin
+				oVGA_R	<=	10'b1111111111;									
+				oVGA_G	<=	10'b0000000000;									
+				oVGA_B	<=	10'b0000000000;	
+			end
+			else
+				if( background )
+				begin
+					oVGA_R	<=	10'b0000000000;									
+					oVGA_G	<=	10'b1111111111;									
+					oVGA_B	<=	10'b0000000000;									
+				end
 end																	// (jd)
 ///////////////////////////////////////////////////////////////////////////
 ///////Drawing flying pixel////////////////////////////////////////////////
@@ -256,6 +263,12 @@ end
 //taki szybki naprzemienny piorun z stojacego piksela w prawo i dol albo w lewo i dol
 //dla ValueChangeX <= ValueChangeX - 1; to pokazuje sie 
 //takie pare kropek latajace w prawo i dol
+
+always@(posedge foodClk)	
+begin
+	foodValueX <= foodValueX + foodX;
+	foodValueY <= foodValueY + foodY;
+end
 
 
 //	Pixel LUT Address Generator

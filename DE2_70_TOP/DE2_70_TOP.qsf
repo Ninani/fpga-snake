@@ -582,3 +582,5 @@ set_global_assignment -name VERILOG_FILE fifo.v
 set_global_assignment -name SYSTEMVERILOG_FILE fifo.sv
 set_global_assignment -name VECTOR_WAVEFORM_FILE debugger.vwf
 set_global_assignment -name INCREMENTAL_VECTOR_INPUT_SOURCE debugger.vwf
+set_global_assignment -name VERILOG_FILE Food_Prescaler.v
+set_global_assignment -name VERILOG_FILE LFSR.v
