@@ -69,7 +69,7 @@ reg			        obrazDlaPoruszajacegoSiePiksela;
 reg		[9:0]		ValueChangeX;
 reg		[9:0]		ValueChangeY;
 reg 	[13:0]		dataToCheck;
-reg 	[13:0]		swapValue;
+reg 	[13:0]		foodScaled;
 
 reg[13:0]              buf_mem[200: 0]; //  
 /*
@@ -87,6 +87,8 @@ reg[13:0] buf_in;
 reg [13:0] buf_out;
 reg [13:0] fifo_counter;
 reg [2:0] check;
+reg [6:0] snakeLength;
+reg [6:0] snakeLengthCopy;
 
 integer i;
 integer j;
@@ -115,13 +117,11 @@ begin
     
      
         
-        buf_mem[0] = 3231;
+        buf_mem[0] = 3231;			//head!
         buf_mem[1] = 3232;
         buf_mem[2] = 3233;
         buf_mem[3] = 3234;
-        buf_mem[4] = 3235;
-        buf_mem[5] = 3236;
-        buf_mem[6] = 3237;
+        snakeLength = 4;
         check = 0;
 end
 
@@ -172,86 +172,68 @@ begin
 	oVGA_G	<=	10'b0000000000;								
 	oVGA_B	<=	10'b0000000000;						
 end
-else
-	/*if( obrazDlaPiksela )
+else		
+	if(food)
 	begin
-		oVGA_R	<=	10'b0000000000;								
-		oVGA_G	<=	10'b0000000000;								
-		oVGA_B	<=	10'b1111111111;						
+		oVGA_R	<=	10'b1111111111;									
+		oVGA_G	<=	10'b0000000000;									
+		oVGA_B	<=	10'b0000000000;	
 	end
-	else*/
-			
-			if(food)
-			begin
-				oVGA_R	<=	10'b1111111111;									
-				oVGA_G	<=	10'b0000000000;									
-				oVGA_B	<=	10'b0000000000;	
-			end
-			else
-				if( background )
-				begin
-					oVGA_R	<=	10'b0000000000;									
-					oVGA_G	<=	10'b1111111111;									
-					oVGA_B	<=	10'b0000000000;									
-				end
+	else
+		if( background )
+		begin
+			oVGA_R	<=	10'b0000000000;									
+			oVGA_G	<=	10'b1111111111;									
+			oVGA_B	<=	10'b0000000000;									
+		end
 end																	// (jd)
 ///////////////////////////////////////////////////////////////////////////
-///////Drawing flying pixel////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////
 
 always@(posedge iPresClk)	
 begin
+		///////////////MYCHANGES CONSUMPTION///////////////
+		foodScaled = (foodValueX/10)*80 + foodValueY/10;
+		if(buf_mem[0] == foodScaled)
+		begin
+			snakeLength = snakeLength+1;
+			foodValueX <= foodValueX + foodX;
+			foodValueY <= foodValueY + foodY;
+		end
+		///////////////////////////////////////////////////
+		snakeLengthCopy = snakeLength;
 		if ((buf_mem[0]/80)*10 > H_SYNC_CYC + H_SYNC_BACK + 50
 		& (buf_mem[0]%80)*10 > V_SYNC_CYC + V_SYNC_BACK + 50
 		& (buf_mem[0]/80)*10 < H_SYNC_CYC + H_SYNC_BACK + H_SYNC_ACT -50 
 		& (buf_mem[0]%80)*10 < V_SYNC_CYC + V_SYNC_BACK + V_SYNC_ACT -50)
 		begin
+			for(j=150;j>0;j=j-1)
+				if(j<snakeLengthCopy)
+					buf_mem[j] = buf_mem[j-1]; 		
 			case(direction)
-			2'b11:
-				begin
-				   //ValueChangeX <= ValueChangeX;
-				   //ValueChangeY <= ValueChangeY - 10;
-				   
-				   for(j=6;j>0;j=j-1)
-						buf_mem[j] = buf_mem[j-1]; 
-					
-					buf_mem[0] = buf_mem[0]-1; 
-				end
-			2'b00:
-				begin
-				   //ValueChangeX <= ValueChangeX;
-				   //ValueChangeY <= ValueChangeY + 10;
-				    for(j=6;j>0;j=j-1)
-						buf_mem[j] = buf_mem[j-1]; 
-					
+				2'b11:			
+					buf_mem[0] = buf_mem[0]-1; 				
+				2'b00:
 					buf_mem[0] = buf_mem[0]+1; 
-				end
-			2'b10:
-				begin
-				   //ValueChangeX <= ValueChangeX - 10;
-				   //ValueChangeY <= ValueChangeY;
-				    for(j=6;j>0;j=j-1)
-						buf_mem[j] = buf_mem[j-1]; 
-					
+				2'b10:
 					buf_mem[0] = buf_mem[0]-80; 
-				end
-			2'b01:
-				begin
-					//ValueChangeX <= ValueChangeX + 10;
-					//ValueChangeY <= ValueChangeY;
-					 for(j=6;j>0;j=j-1)
-						buf_mem[j] = buf_mem[j-1]; 
-				
+				2'b01:
 					buf_mem[0] = buf_mem[0]+80; 
-				end
 			endcase
 		end
 		else
 		begin
-			//ValueChangeX <= 10'b0100000000;
-			//ValueChangeY <= 10'b0100000000;
-			for(j=0;j<6;j=j+1)
-				buf_mem[j] =3231+j;;
+			if ((buf_mem[0]/80)*10 <= H_SYNC_CYC + H_SYNC_BACK + 50)
+				buf_mem[0] = ((H_SYNC_CYC + H_SYNC_BACK + H_SYNC_ACT -60)/10)*80 + (buf_mem[0]%80);
+			else
+			if((buf_mem[0]%80)*10 <= V_SYNC_CYC + V_SYNC_BACK + 50)
+				buf_mem[0] = (buf_mem[0]/80)*80 + (V_SYNC_CYC + V_SYNC_BACK + V_SYNC_ACT -60)/10 ;
+			else
+			if((buf_mem[0]/80)*10 >= H_SYNC_CYC + H_SYNC_BACK + H_SYNC_ACT -50 )
+				buf_mem[0] = ((H_SYNC_CYC + H_SYNC_BACK + 60)/10)*80 + (buf_mem[0]%80);
+			else
+			if((buf_mem[0]%80)*10 >= V_SYNC_CYC + V_SYNC_BACK + V_SYNC_ACT -50 )
+				buf_mem[0] = (buf_mem[0]/80)*80 + (V_SYNC_CYC + V_SYNC_BACK + 60)/10;
 		end
 end
 
@@ -263,13 +245,13 @@ end
 //taki szybki naprzemienny piorun z stojacego piksela w prawo i dol albo w lewo i dol
 //dla ValueChangeX <= ValueChangeX - 1; to pokazuje sie 
 //takie pare kropek latajace w prawo i dol
-
+/*
 always@(posedge foodClk)	
 begin
 	foodValueX <= foodValueX + foodX;
 	foodValueY <= foodValueY + foodY;
 end
-
+*/
 
 //	Pixel LUT Address Generator
 always@(posedge iCLK or negedge iRST_N)

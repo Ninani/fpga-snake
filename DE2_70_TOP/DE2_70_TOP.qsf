@@ -30,6 +30,7 @@ set_global_assignment -name ORIGINAL_QUARTUS_VERSION "7.1 SP1"
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "10:51:53  AUGUST 02, 2007"
 set_global_assignment -name LAST_QUARTUS_VERSION "9.0 SP2"
 
+
 set_location_assignment PIN_D27 -to oENET_CLK
 set_location_assignment PIN_E16 -to iCLK_28
 set_location_assignment PIN_AD15 -to iCLK_50
