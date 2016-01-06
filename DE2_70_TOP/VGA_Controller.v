@@ -49,12 +49,14 @@ output				oVGA_CLOCK;
 //	Control Signal
 input				iCLK;
 input				iRST_N;
-input				foodClk;
 input				iPresClk;
 input				iUpButton;
 input				iDownButton;
 input				iLeftButton;
 input				iRightButton;
+input		[9:0]	foodX;
+input		[9:0]	foodY;
+input				foodClk;
 
 //	Internal Registers and Wires
 reg		[9:0]		H_Cont;
@@ -98,8 +100,7 @@ assign	oVGA_CLOCK	=	iCLK;
 
 reg					background; 
 reg					food;
-input [9:0]			foodX; 
-input [9:0]			foodY;
+
 reg		[9:0]		foodValueX;
 reg		[9:0]		foodValueY;
 
@@ -197,8 +198,8 @@ begin
 		if(buf_mem[0] == foodScaled)
 		begin
 			snakeLength = snakeLength+1;
-			foodValueX <= foodValueX + foodX;
-			foodValueY <= foodValueY + foodY;
+			foodValueX <= foodX;
+			foodValueY <= foodY;
 		end
 		///////////////////////////////////////////////////
 		snakeLengthCopy = snakeLength;
@@ -399,13 +400,16 @@ output [13:0] data;
 endtask
 */
 
+
 //food generator
+/*
 reg [5:0] xFood;
 reg [5:0] yFood;
 reg foodOnBoard;
 
-wire [5:0] xRand;
-wire [5:0] yRand;
+wire [9:0] xRand;
+wire [9:0] yRand;
+
 
 LFSR lfsr( 
 	.clk1(iCLK),
@@ -415,7 +419,9 @@ LFSR lfsr(
 	.YCoord(yRand)
 			
 );
+*/
 
+/*
 always @(posedge iCLK)
 begin
 	foodOnBoard <= 0;
@@ -427,10 +433,9 @@ begin
 	end
 	if(yFood>47) yFood <= yRand;
 end
+*/
 
 //display food
-
-
 
 //END food generator
 

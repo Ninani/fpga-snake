@@ -496,18 +496,27 @@ VGA_Controller	myCtrl(	.iRed(mVGA_R),
 
 wire [9:0] x;
 wire [9:0] y;
-wire foodClk;					
+//wire foodClk;					
 
-					
+/*					
 Food_Prescaler(	.clkin(iCLK_50_2),
 				.clkout(foodClk)
 );
-
+*/
+/*
 LFSR random (	.clk1(iCLK_28),
 				.clk2(iCLK_50),
 				.rst_n(DLY_RST),
 				.XCoord(x),
 				.YCoord(y)
+);
+*/
+
+Food_Generator food(	.clk1(iCLK_28),
+						.clk2(iCLK_50),
+						.rst_n(DLY_RST),
+						.xFood(x),
+						.yFood(y)
 );
 
 PS2_Controller keyCtrl( .data(PS2_KBDAT),
@@ -517,6 +526,9 @@ PS2_Controller keyCtrl( .data(PS2_KBDAT),
 						.down(buttonDown),
 						.right(buttonRight)
 );
+
+
+
 
 
 

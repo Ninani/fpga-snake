@@ -1,6 +1,6 @@
 module PS2_Controller(
-	input wire  data,				//	PS2 Keyboard Data
-	input wire clk,				//	PS2 Keyboard Clock
+	input wire  data,			
+	input wire clk,				
 	output reg up,
 	output reg left,
 	output reg down,
@@ -29,7 +29,6 @@ always @(negedge clk)
 begin
 	case(b)
 	1:;
-	//first bit
 	2:current_data[0]<=data;
 	3:current_data[1]<=data;
 	4:current_data[2]<=data;
@@ -49,7 +48,6 @@ begin
 end 
 
 always@(posedge flag)
-// Printing data obtained to led
 begin 
 	if(current_data==8'hf0)
 		begin
