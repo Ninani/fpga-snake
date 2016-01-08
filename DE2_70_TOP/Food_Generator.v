@@ -14,10 +14,10 @@ wire [9:0] y;
 
 always@(posedge clk2)
 begin
-	if(x < H_SYNC_CYC + H_SYNC_BACK + H_SYNC_ACT + 5
-	& x > H_SYNC_CYC + H_SYNC_BACK - 5
-	& y < V_SYNC_CYC + V_SYNC_BACK + V_SYNC_ACT + 5
-	& y > V_SYNC_CYC + V_SYNC_BACK - 5)
+	if(x < H_SYNC_CYC + H_SYNC_BACK + H_SYNC_ACT - 6
+	& x > H_SYNC_CYC + H_SYNC_BACK + 6
+	& y < V_SYNC_CYC + V_SYNC_BACK + V_SYNC_ACT - 6
+	& y > V_SYNC_CYC + V_SYNC_BACK + 6)
 	begin
 		xFood <= x;
 		yFood <= y;
