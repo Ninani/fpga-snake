@@ -1,6 +1,5 @@
 module Food_Generator(
-	input	clk1,
-	input	clk2,
+	input	clk,
 	input	rst_n,
 	output	reg	[9:0]	xFood,
 	output	reg	[9:0]	yFood
@@ -12,7 +11,7 @@ wire [9:0] x;
 wire [9:0] y;
 
 
-always@(posedge clk2)
+always@(posedge clk)
 begin
 	if(x < H_SYNC_CYC + H_SYNC_BACK + H_SYNC_ACT - 6
 	& x > H_SYNC_CYC + H_SYNC_BACK + 6
@@ -26,8 +25,7 @@ end
 
 
 
-LFSR random (	.clk1(clk1),
-				.clk2(clk2),
+LFSR random (	.clk(clk),
 				.rst_n(rst_n),
 				.XCoord(x),
 				.YCoord(y)

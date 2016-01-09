@@ -512,8 +512,7 @@ LFSR random (	.clk1(iCLK_28),
 );
 */
 
-Food_Generator food(	.clk1(iCLK_28),
-						.clk2(iCLK_50),
+Food_Generator food(	.clk(iCLK_50),
 						.rst_n(DLY_RST),
 						.xFood(x),
 						.yFood(y)

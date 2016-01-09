@@ -1,7 +1,6 @@
 module LFSR 
 (
-	input clk1,
-	input clk2,
+	input clk,
 	input rst_n,
 	
 
@@ -11,16 +10,16 @@ module LFSR
 
 wire feedbackX;
 wire feedbackY;
-assign feedbackX = XCoord[0] ^ XCoord[9];
-assign feedbackY = YCoord[0] ^ YCoord[9];
+//assign feedbackX = XCoord[0] ^ XCoord[9];
+//assign feedbackY = YCoord[0] ^ YCoord[9];
 
-always @(posedge clk1 or negedge rst_n)
+always @(posedge clk or negedge rst_n)
 	if(rst_n==1'b0)
 		XCoord <= 10'hF;	//reset condition
 	else
 	begin 
 		//XCoord <= {XCoord[9:0], feedbackX};
-		XCoord[0] <= feedbackX; 
+		XCoord[0] <= XCoord[0] ^ XCoord[9]; 
 		XCoord[1] <= XCoord[0];
 		XCoord[2] <= XCoord[1];
 		XCoord[3] <= XCoord[2];
@@ -32,20 +31,20 @@ always @(posedge clk1 or negedge rst_n)
 		XCoord[9] <= XCoord[8];
 	end
 
-always @(posedge clk2 or negedge rst_n)
+always @(posedge clk or negedge rst_n)
 	if(rst_n==1'b0)
 		YCoord <= 10'hF;
 	else
 	begin
 		//YCoord <= {YCoord[9:0], feedbackY};
-		YCoord[0] <= feedbackY; 
+		YCoord[0] <= YCoord[9]; 
 		YCoord[1] <= YCoord[0];
 		YCoord[2] <= YCoord[1];
 		YCoord[3] <= YCoord[2];
 		YCoord[4] <= YCoord[3];
 		YCoord[5] <= YCoord[4];
 		YCoord[6] <= YCoord[5];
-		YCoord[7] <= YCoord[6];
+		YCoord[7] <= YCoord[6] ^ YCoord[9];
 		YCoord[8] <= YCoord[7];
 		YCoord[9] <= YCoord[8];
 	end
