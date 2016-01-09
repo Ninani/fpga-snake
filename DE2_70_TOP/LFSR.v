@@ -15,7 +15,7 @@ wire feedbackY;
 
 always @(posedge clk or negedge rst_n)
 	if(rst_n==1'b0)
-		XCoord <= 10'hF;	//reset condition
+		XCoord <= 10'b1111111111;	//reset condition
 	else
 	begin 
 		//XCoord <= {XCoord[9:0], feedbackX};
@@ -33,7 +33,7 @@ always @(posedge clk or negedge rst_n)
 
 always @(posedge clk or negedge rst_n)
 	if(rst_n==1'b0)
-		YCoord <= 10'hF;
+		YCoord <= 10'b1111111111;
 	else
 	begin
 		//YCoord <= {YCoord[9:0], feedbackY};
