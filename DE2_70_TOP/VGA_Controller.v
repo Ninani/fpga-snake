@@ -74,14 +74,6 @@ reg 	[13:0]		dataToCheck;
 reg 	[13:0]		foodScaled;
 
 reg[13:0]              buf_mem[200: 0]; //  
-/*
-reg rst, wr_en, rd_en;
-wire buf_empty, buf_full;
-reg[13:0] buf_in;
-reg[13:0] tempdata;
-wire [13:0] buf_out;
-wire [13:0] fifo_counter;
-*/
 
 reg rst, wr_en, rd_en;
 reg buf_empty, buf_full;
@@ -106,17 +98,9 @@ reg		[9:0]		foodValueY;
 
 
 initial
-begin
-/*
-   rst = 1;
-        rd_en = 0;
-        wr_en = 0;
-        buf_in = 0;*/
-  
+begin  
     for(i = 0;i<140;i = i+1)
 			buf_mem[i] = 0;
-    
-     
         
         buf_mem[0] = 3231;			//head!
         buf_mem[1] = 3232;
@@ -138,12 +122,8 @@ begin															// (jd)
 			
 	background =   (H_Cont > H_SYNC_CYC + H_SYNC_BACK)                	// (jd)
 			& (H_Cont < H_SYNC_CYC + H_SYNC_BACK + H_SYNC_ACT);  	// (jd)
+		
 
-//dataTofod = (foodValueX/10)*80 + foodValueY/10;			
-	/*food = (H_Cont <= foodValueX  + 5)       
-		& (H_Cont >= foodValueX - 5)  
-		& (V_Cont <= foodValueY + 5)       
-		& (V_Cont >= foodValueY - 5); 	*/
 	food = (H_Cont > H_SYNC_CYC + H_SYNC_BACK)       
 		& (H_Cont < H_SYNC_CYC + H_SYNC_BACK + H_SYNC_ACT)  
 		& 			   (V_Cont > V_SYNC_CYC + V_SYNC_BACK)       
@@ -151,8 +131,7 @@ begin															// (jd)
 		& (H_Cont/10)*80 + V_Cont/10 == (foodValueX/10)*80 + foodValueY/10;;
 	
 dataToCheck = (H_Cont/10)*80 + V_Cont/10;
-//dataToCheck = (H_Cont/10)*80 + V_Cont/10;;
-//containsTask();
+
 check = 0;
 for(i = 0;i<50;i = i+1)
 begin
@@ -167,11 +146,6 @@ obrazDlaPoruszajacegoSiePiksela =  (H_Cont > H_SYNC_CYC + H_SYNC_BACK)
 		& 			   (V_Cont > V_SYNC_CYC + V_SYNC_BACK)       
 		& (V_Cont < V_SYNC_CYC + V_SYNC_BACK + V_SYNC_ACT)
 		& check == 1;
-/*
-(H_Cont <= ValueChangeX - 4)
-								  & (H_Cont >= ValueChangeX + 5)
-								  & (V_Cont <= ValueChangeY + 5)
-								  & (V_Cont >= ValueChangeY - 4);*/
 
 if( obrazDlaPoruszajacegoSiePiksela )
 begin
@@ -209,7 +183,7 @@ begin
 		end
 		///////////////////////////////////////////////////
 		snakeLengthCopy = snakeLength;
-		if ((buf_mem[0]/80)*10 >= H_SYNC_CYC + H_SYNC_BACK + 10
+		/*if ((buf_mem[0]/80)*10 >= H_SYNC_CYC + H_SYNC_BACK + 10
 		& (buf_mem[0]%80)*10 >= V_SYNC_CYC + V_SYNC_BACK + 10
 		& (buf_mem[0]/80)*10 <= H_SYNC_CYC + H_SYNC_BACK + H_SYNC_ACT -10 
 		& (buf_mem[0]%80)*10 <= V_SYNC_CYC + V_SYNC_BACK + V_SYNC_ACT -10)
@@ -241,25 +215,50 @@ begin
 			else
 			if((buf_mem[0]%80)*10 >= V_SYNC_CYC + V_SYNC_BACK + V_SYNC_ACT -10 )
 				buf_mem[0] = (buf_mem[0]/80)*80 + (V_SYNC_CYC + V_SYNC_BACK + 10)/10;
+		end*/
+		
+		
+			if ((buf_mem[0]/80)*10 <= H_SYNC_CYC + H_SYNC_BACK + 10)
+				buf_mem[0] = ((H_SYNC_CYC + H_SYNC_BACK + H_SYNC_ACT -10)/10)*80 + (buf_mem[0]%80);
+			else
+			if((buf_mem[0]%80)*10 <= V_SYNC_CYC + V_SYNC_BACK + 10)
+				buf_mem[0] = (buf_mem[0]/80)*80 + (V_SYNC_CYC + V_SYNC_BACK + V_SYNC_ACT -10)/10 ;
+			else
+			if((buf_mem[0]/80)*10 >= H_SYNC_CYC + H_SYNC_BACK + H_SYNC_ACT -10 )
+				buf_mem[0] = ((H_SYNC_CYC + H_SYNC_BACK + 10)/10)*80 + (buf_mem[0]%80);
+			else
+			if((buf_mem[0]%80)*10 >= V_SYNC_CYC + V_SYNC_BACK + V_SYNC_ACT -10 )
+				buf_mem[0] = (buf_mem[0]/80)*80 + (V_SYNC_CYC + V_SYNC_BACK + 10)/10;		
+		
+		
+	/*	if ((buf_mem[0]/80)*10 < H_SYNC_CYC + H_SYNC_BACK + 10
+		| (buf_mem[0]%80)*10 < V_SYNC_CYC + V_SYNC_BACK + 10
+		| (buf_mem[0]/80)*10 > H_SYNC_CYC + H_SYNC_BACK + H_SYNC_ACT -10 
+		| (buf_mem[0]%80)*10 > V_SYNC_CYC + V_SYNC_BACK + V_SYNC_ACT -10)
+		begin
 		end
+		else
+		begin*/
+			for(j=150;j>0;j=j-1)
+				if(j<snakeLengthCopy)
+					buf_mem[j] = buf_mem[j-1]; 		
+			case(direction)
+				2'b11:			
+					buf_mem[0] = buf_mem[0]-1; 				
+				2'b00:
+					buf_mem[0] = buf_mem[0]+1; 
+				2'b10:
+					buf_mem[0] = buf_mem[0]-80; 
+				2'b01:
+					buf_mem[0] = buf_mem[0]+80; 
+			endcase
+	//	end
 end
 
 always@(posedge iCLK)										
 begin			
 	
 end
-//dla ValueChangeX <= ValueChangeX + 1; to pokazuje sie 
-//taki szybki naprzemienny piorun z stojacego piksela w prawo i dol albo w lewo i dol
-//dla ValueChangeX <= ValueChangeX - 1; to pokazuje sie 
-//takie pare kropek latajace w prawo i dol
-/*
-always@(posedge foodClk)	
-begin
-	foodValueX <= foodValueX + foodX;
-	foodValueY <= foodValueY + foodY;
-end
-*/
-
 //	Pixel LUT Address Generator
 always@(posedge iCLK or negedge iRST_N)
 begin
@@ -339,23 +338,27 @@ always@(posedge iUpButton or posedge iLeftButton or posedge iDownButton or posed
 begin
 	if(iUpButton)
 	begin
-		direction<=2'b11;
+		//if(direction!=2'b00)
+			direction<=2'b11;
 	end
 	else
 	begin
 	if(iDownButton)
 	begin
-		direction<=2'b00;
+		//if(direction!=2'b11)
+			direction<=2'b00;
 	end
 	else
 	begin
 	if(iLeftButton)
 	begin
-		direction<=2'b10;
+		//if(direction!=2'b01)
+			direction<=2'b10;
 	end
 	else
 	begin
-		direction<=2'b01;
+		//if(direction!=2'b10)
+			direction<=2'b01;
 	end	
 	end
 	end
@@ -376,36 +379,6 @@ begin
 				?	Cur_Color_B	:	0;
 end
 */
-
-/*
-task push;
-input[13:0] data;
-
-
-   if( ! buf_full )
-   begin
-           buf_in = data;
-           wr_en = 1;
-                @(posedge iCLK);
-                #1 wr_en = 0;
-   end
-endtask
-
-task pop;
-output [13:0] data;
-
-   if( ! buf_empty )
-   begin
-
-     rd_en = 1;
-          @(posedge iCLK);
-
-          #1 rd_en = 0;
-          data = buf_out;
-        end
-endtask
-*/
-
 
 //food generator
 /*
