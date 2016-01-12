@@ -138,12 +138,18 @@ begin															// (jd)
 			
 	background =   (H_Cont > H_SYNC_CYC + H_SYNC_BACK)                	// (jd)
 			& (H_Cont < H_SYNC_CYC + H_SYNC_BACK + H_SYNC_ACT);  	// (jd)
-			
-	food = (H_Cont <= foodValueX  + 5)       
+
+//dataTofod = (foodValueX/10)*80 + foodValueY/10;			
+	/*food = (H_Cont <= foodValueX  + 5)       
 		& (H_Cont >= foodValueX - 5)  
 		& (V_Cont <= foodValueY + 5)       
-		& (V_Cont >= foodValueY - 5); 	
-
+		& (V_Cont >= foodValueY - 5); 	*/
+	food = (H_Cont > H_SYNC_CYC + H_SYNC_BACK)       
+		& (H_Cont < H_SYNC_CYC + H_SYNC_BACK + H_SYNC_ACT)  
+		& 			   (V_Cont > V_SYNC_CYC + V_SYNC_BACK)       
+		& (V_Cont < V_SYNC_CYC + V_SYNC_BACK + V_SYNC_ACT)
+		& (H_Cont/10)*80 + V_Cont/10 == (foodValueX/10)*80 + foodValueY/10;;
+	
 dataToCheck = (H_Cont/10)*80 + V_Cont/10;
 //dataToCheck = (H_Cont/10)*80 + V_Cont/10;;
 //containsTask();
@@ -203,10 +209,10 @@ begin
 		end
 		///////////////////////////////////////////////////
 		snakeLengthCopy = snakeLength;
-		if ((buf_mem[0]/80)*10 > H_SYNC_CYC + H_SYNC_BACK + 50
-		& (buf_mem[0]%80)*10 > V_SYNC_CYC + V_SYNC_BACK + 50
-		& (buf_mem[0]/80)*10 < H_SYNC_CYC + H_SYNC_BACK + H_SYNC_ACT -50 
-		& (buf_mem[0]%80)*10 < V_SYNC_CYC + V_SYNC_BACK + V_SYNC_ACT -50)
+		if ((buf_mem[0]/80)*10 >= H_SYNC_CYC + H_SYNC_BACK + 10
+		& (buf_mem[0]%80)*10 >= V_SYNC_CYC + V_SYNC_BACK + 10
+		& (buf_mem[0]/80)*10 <= H_SYNC_CYC + H_SYNC_BACK + H_SYNC_ACT -10 
+		& (buf_mem[0]%80)*10 <= V_SYNC_CYC + V_SYNC_BACK + V_SYNC_ACT -10)
 		begin
 			for(j=150;j>0;j=j-1)
 				if(j<snakeLengthCopy)
@@ -224,17 +230,17 @@ begin
 		end
 		else
 		begin
-			if ((buf_mem[0]/80)*10 <= H_SYNC_CYC + H_SYNC_BACK + 50)
-				buf_mem[0] = ((H_SYNC_CYC + H_SYNC_BACK + H_SYNC_ACT -60)/10)*80 + (buf_mem[0]%80);
+			if ((buf_mem[0]/80)*10 <= H_SYNC_CYC + H_SYNC_BACK + 10)
+				buf_mem[0] = ((H_SYNC_CYC + H_SYNC_BACK + H_SYNC_ACT -10)/10)*80 + (buf_mem[0]%80);
 			else
-			if((buf_mem[0]%80)*10 <= V_SYNC_CYC + V_SYNC_BACK + 50)
-				buf_mem[0] = (buf_mem[0]/80)*80 + (V_SYNC_CYC + V_SYNC_BACK + V_SYNC_ACT -60)/10 ;
+			if((buf_mem[0]%80)*10 <= V_SYNC_CYC + V_SYNC_BACK + 10)
+				buf_mem[0] = (buf_mem[0]/80)*80 + (V_SYNC_CYC + V_SYNC_BACK + V_SYNC_ACT -10)/10 ;
 			else
-			if((buf_mem[0]/80)*10 >= H_SYNC_CYC + H_SYNC_BACK + H_SYNC_ACT -50 )
-				buf_mem[0] = ((H_SYNC_CYC + H_SYNC_BACK + 60)/10)*80 + (buf_mem[0]%80);
+			if((buf_mem[0]/80)*10 >= H_SYNC_CYC + H_SYNC_BACK + H_SYNC_ACT -10 )
+				buf_mem[0] = ((H_SYNC_CYC + H_SYNC_BACK + 10)/10)*80 + (buf_mem[0]%80);
 			else
-			if((buf_mem[0]%80)*10 >= V_SYNC_CYC + V_SYNC_BACK + V_SYNC_ACT -50 )
-				buf_mem[0] = (buf_mem[0]/80)*80 + (V_SYNC_CYC + V_SYNC_BACK + 60)/10;
+			if((buf_mem[0]%80)*10 >= V_SYNC_CYC + V_SYNC_BACK + V_SYNC_ACT -10 )
+				buf_mem[0] = (buf_mem[0]/80)*80 + (V_SYNC_CYC + V_SYNC_BACK + 10)/10;
 		end
 end
 
