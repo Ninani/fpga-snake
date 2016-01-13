@@ -72,6 +72,7 @@ reg			        obrazDlaProstokata;
 reg			        obrazDlaPoruszajacegoSiePiksela;
 reg			        obrazGlowy;
 reg		[9:0]		ValueChangeX;
+reg		[5:0]		counter=0;
 reg		[9:0]		ValueChangeY;
 reg 	[13:0]		dataToCheck;
 reg 	[13:0]		foodScaled;
@@ -207,6 +208,25 @@ end																	// (jd)
 always@(posedge iPresClk)	
 begin
 		///////////////MYCHANGES CONSUMPTION///////////////
+		if(notended==0)
+		begin
+			if(counter<10)
+				counter = counter+1;
+			else
+			begin
+				counter = 0;
+				for(i = 0;i<140;i = i+1)
+					buf_mem[i] = 0;
+        
+				buf_mem[0] = 3231;			//head!
+				buf_mem[1] = 3232;
+				buf_mem[2] = 3233;
+				buf_mem[3] = 3234;
+				snakeLength = 4;
+				notended = 1;
+			end
+		end
+			
 		foodScaled = (foodValueX/10)*80 + foodValueY/10;
 		if(buf_mem[0] == foodScaled)
 		begin
