@@ -68,6 +68,7 @@ reg					obraz;  			// (jd)
 reg					obrazDlaPiksela;  	
 reg			        obrazDlaProstokata;
 reg			        obrazDlaPoruszajacegoSiePiksela;
+reg			        obrazGlowy;
 reg		[9:0]		ValueChangeX;
 reg		[9:0]		ValueChangeY;
 reg 	[13:0]		dataToCheck;
@@ -81,6 +82,7 @@ reg[13:0] buf_in;
 reg [13:0] buf_out;
 reg [13:0] fifo_counter;
 reg [2:0] check;
+reg [2:0] head;
 reg [6:0] snakeLength;
 reg [6:0] snakeLengthCopy;
 
@@ -92,6 +94,7 @@ assign	oVGA_CLOCK	=	iCLK;
 
 reg					background; 
 reg					food;
+reg					notended;
 
 reg		[9:0]		foodValueX;
 reg		[9:0]		foodValueY;
@@ -108,6 +111,8 @@ begin
         buf_mem[3] = 3234;
         snakeLength = 4;
         check = 0;
+        head = 0;
+        notended = 1;
 end
 
 
@@ -133,6 +138,7 @@ begin															// (jd)
 dataToCheck = (H_Cont/10)*80 + V_Cont/10;
 
 check = 0;
+head = 0;
 for(i = 0;i<50;i = i+1)
 begin
 	if(buf_mem[i] == dataToCheck)
@@ -147,6 +153,24 @@ obrazDlaPoruszajacegoSiePiksela =  (H_Cont > H_SYNC_CYC + H_SYNC_BACK)
 		& (V_Cont < V_SYNC_CYC + V_SYNC_BACK + V_SYNC_ACT)
 		& check == 1;
 
+if(buf_mem[0] == dataToCheck)
+	head = 1;
+	
+obrazGlowy =  (H_Cont > H_SYNC_CYC + H_SYNC_BACK)       
+		& (H_Cont < H_SYNC_CYC + H_SYNC_BACK + H_SYNC_ACT)  
+		& 			   (V_Cont > V_SYNC_CYC + V_SYNC_BACK)       
+		& (V_Cont < V_SYNC_CYC + V_SYNC_BACK + V_SYNC_ACT)
+		& head == 1;
+
+if(notended==1)
+begin
+if(obrazGlowy)
+begin
+	oVGA_R	<=	10'b1111111111;								
+	oVGA_G	<=	10'b0000000000;								
+	oVGA_B	<=	10'b0000000000;	
+end
+else
 if( obrazDlaPoruszajacegoSiePiksela )
 begin
 	oVGA_R	<=	10'b0000000000;								
@@ -167,6 +191,13 @@ else
 			oVGA_G	<=	10'b1111111111;									
 			oVGA_B	<=	10'b0000000000;									
 		end
+end
+else
+begin
+			oVGA_R	<=	10'b1111111111;									
+			oVGA_G	<=	10'b0000000000;									
+			oVGA_B	<=	10'b0000000000;	
+end
 end																	// (jd)
 ///////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////
@@ -181,78 +212,39 @@ begin
 			foodValueX <= foodX;
 			foodValueY <= foodY;
 		end
+		
 		///////////////////////////////////////////////////
 		snakeLengthCopy = snakeLength;
-		/*if ((buf_mem[0]/80)*10 >= H_SYNC_CYC + H_SYNC_BACK + 10
-		& (buf_mem[0]%80)*10 >= V_SYNC_CYC + V_SYNC_BACK + 10
-		& (buf_mem[0]/80)*10 <= H_SYNC_CYC + H_SYNC_BACK + H_SYNC_ACT -10 
-		& (buf_mem[0]%80)*10 <= V_SYNC_CYC + V_SYNC_BACK + V_SYNC_ACT -10)
-		begin
-			for(j=150;j>0;j=j-1)
-				if(j<snakeLengthCopy)
-					buf_mem[j] = buf_mem[j-1]; 		
-			case(direction)
-				2'b11:			
-					buf_mem[0] = buf_mem[0]-1; 				
-				2'b00:
-					buf_mem[0] = buf_mem[0]+1; 
-				2'b10:
-					buf_mem[0] = buf_mem[0]-80; 
-				2'b01:
-					buf_mem[0] = buf_mem[0]+80; 
-			endcase
-		end
+		if ((buf_mem[0]/80)*10 <= H_SYNC_CYC + H_SYNC_BACK + 10)
+			buf_mem[0] = ((H_SYNC_CYC + H_SYNC_BACK + H_SYNC_ACT -10)/10)*80 + (buf_mem[0]%80);
 		else
-		begin
-			if ((buf_mem[0]/80)*10 <= H_SYNC_CYC + H_SYNC_BACK + 10)
-				buf_mem[0] = ((H_SYNC_CYC + H_SYNC_BACK + H_SYNC_ACT -10)/10)*80 + (buf_mem[0]%80);
-			else
-			if((buf_mem[0]%80)*10 <= V_SYNC_CYC + V_SYNC_BACK + 10)
-				buf_mem[0] = (buf_mem[0]/80)*80 + (V_SYNC_CYC + V_SYNC_BACK + V_SYNC_ACT -10)/10 ;
-			else
-			if((buf_mem[0]/80)*10 >= H_SYNC_CYC + H_SYNC_BACK + H_SYNC_ACT -10 )
-				buf_mem[0] = ((H_SYNC_CYC + H_SYNC_BACK + 10)/10)*80 + (buf_mem[0]%80);
-			else
-			if((buf_mem[0]%80)*10 >= V_SYNC_CYC + V_SYNC_BACK + V_SYNC_ACT -10 )
-				buf_mem[0] = (buf_mem[0]/80)*80 + (V_SYNC_CYC + V_SYNC_BACK + 10)/10;
-		end*/
-		
-		
-			if ((buf_mem[0]/80)*10 <= H_SYNC_CYC + H_SYNC_BACK + 10)
-				buf_mem[0] = ((H_SYNC_CYC + H_SYNC_BACK + H_SYNC_ACT -10)/10)*80 + (buf_mem[0]%80);
-			else
-			if((buf_mem[0]%80)*10 <= V_SYNC_CYC + V_SYNC_BACK + 10)
-				buf_mem[0] = (buf_mem[0]/80)*80 + (V_SYNC_CYC + V_SYNC_BACK + V_SYNC_ACT -10)/10 ;
-			else
-			if((buf_mem[0]/80)*10 >= H_SYNC_CYC + H_SYNC_BACK + H_SYNC_ACT -10 )
-				buf_mem[0] = ((H_SYNC_CYC + H_SYNC_BACK + 10)/10)*80 + (buf_mem[0]%80);
-			else
-			if((buf_mem[0]%80)*10 >= V_SYNC_CYC + V_SYNC_BACK + V_SYNC_ACT -10 )
-				buf_mem[0] = (buf_mem[0]/80)*80 + (V_SYNC_CYC + V_SYNC_BACK + 10)/10;		
-		
-		
-	/*	if ((buf_mem[0]/80)*10 < H_SYNC_CYC + H_SYNC_BACK + 10
-		| (buf_mem[0]%80)*10 < V_SYNC_CYC + V_SYNC_BACK + 10
-		| (buf_mem[0]/80)*10 > H_SYNC_CYC + H_SYNC_BACK + H_SYNC_ACT -10 
-		| (buf_mem[0]%80)*10 > V_SYNC_CYC + V_SYNC_BACK + V_SYNC_ACT -10)
-		begin
-		end
+		if((buf_mem[0]%80)*10 <= V_SYNC_CYC + V_SYNC_BACK + 10)
+			buf_mem[0] = (buf_mem[0]/80)*80 + (V_SYNC_CYC + V_SYNC_BACK + V_SYNC_ACT -10)/10 ;
 		else
-		begin*/
-			for(j=150;j>0;j=j-1)
-				if(j<snakeLengthCopy)
-					buf_mem[j] = buf_mem[j-1]; 		
-			case(direction)
-				2'b11:			
-					buf_mem[0] = buf_mem[0]-1; 				
-				2'b00:
-					buf_mem[0] = buf_mem[0]+1; 
-				2'b10:
-					buf_mem[0] = buf_mem[0]-80; 
-				2'b01:
-					buf_mem[0] = buf_mem[0]+80; 
-			endcase
-	//	end
+		if((buf_mem[0]/80)*10 >= H_SYNC_CYC + H_SYNC_BACK + H_SYNC_ACT -10 )
+			buf_mem[0] = ((H_SYNC_CYC + H_SYNC_BACK + 10)/10)*80 + (buf_mem[0]%80);
+		else
+		if((buf_mem[0]%80)*10 >= V_SYNC_CYC + V_SYNC_BACK + V_SYNC_ACT -10 )
+			buf_mem[0] = (buf_mem[0]/80)*80 + (V_SYNC_CYC + V_SYNC_BACK + 10)/10;		
+		
+		for(j=150;j>0;j=j-1)
+			if(j<snakeLengthCopy)
+				if(buf_mem[0] == buf_mem[j])
+					notended = 0;
+					
+		for(j=150;j>0;j=j-1)
+			if(j<snakeLengthCopy)
+				buf_mem[j] = buf_mem[j-1]; 		
+		case(direction)
+			2'b11:			
+				buf_mem[0] = buf_mem[0]-1; 				
+			2'b00:
+				buf_mem[0] = buf_mem[0]+1; 
+			2'b10:
+				buf_mem[0] = buf_mem[0]-80; 
+			2'b01:
+				buf_mem[0] = buf_mem[0]+80; 
+		endcase
 end
 
 always@(posedge iCLK)										
@@ -363,8 +355,28 @@ begin
 	end
 	end
 end
-
-
+/*
+always@(posedge iUpButton)
+begin
+		//if(direction!=2'b00)
+		direction<=2'b11;
+end
+always@(posedge iDownButton)
+begin
+		//if(direction!=2'b11)
+			direction<=2'b00;
+end
+always@(posedge iLeftButton)
+begin
+		//if(direction!=2'b01)
+			direction<=2'b10;
+end
+always@(posedge iRightButton)
+begin
+		//if(direction!=2'b10)
+			direction<=2'b01;
+end
+*/
 /*
 always@(posedge iCLK)
 begin
