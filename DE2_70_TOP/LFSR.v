@@ -2,7 +2,8 @@ module LFSR
 (
 	input clk1,
 	input clk2,
-	input rst_n,
+	input rst1_n,
+	input rst2_n,
 	
 
 	output reg [9:0] XCoord,
@@ -14,8 +15,8 @@ wire feedbackY;
 assign feedbackX = XCoord[0] ^ XCoord[9];
 assign feedbackY = YCoord[0] ^ YCoord[9];
 
-always @(posedge clk1 or negedge rst_n)
-	if(rst_n==1'b0)
+always @(posedge clk1 or negedge rst1_n)
+	if(rst1_n==1'b0)
 		XCoord <= 10'hF;	//reset condition
 	else
 	begin 
@@ -32,8 +33,8 @@ always @(posedge clk1 or negedge rst_n)
 		XCoord[9] <= XCoord[8];
 	end
 
-always @(posedge clk2 or negedge rst_n)
-	if(rst_n==1'b0)
+always @(posedge clk2 or negedge rst2_n)
+	if(rst2_n==1'b0)
 		YCoord <= 10'hF;
 	else
 	begin

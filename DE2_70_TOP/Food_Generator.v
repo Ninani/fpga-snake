@@ -1,7 +1,8 @@
 module Food_Generator(
 	input	clk1,
 	input	clk2,
-	input	rst_n,
+	input	rst1_n,
+	input	rst2_n,
 	output	reg	[9:0]	xFood,
 	output	reg	[9:0]	yFood
 );
@@ -28,7 +29,8 @@ end
 
 LFSR random (	.clk1(clk1),
 				.clk2(clk2),
-				.rst_n(rst_n),
+				.rst1_n(rst1_n),
+				.rst2_n(rst2_n),
 				.XCoord(x),
 				.YCoord(y)
 );

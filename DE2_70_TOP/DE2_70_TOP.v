@@ -435,6 +435,8 @@ Reset_Delay	r0	(	.iCLK(iCLK_50),.oRESET(DLY_RST)	);
 //From 50Hz to 25Hz
 PLL			p2	(.areset(~DLY_RST),.inclk0(iCLK_50),.c0(VGA_CTRL_CLK));
 
+Reset_Delay	r1	(	.iCLK(iCLK_28),.oRESET(DLY28_RST)	);
+
 wire	outerClk;			
 anim_prescaler	myPresc(		
 						.clkin(VGA_CTRL_CLK),
@@ -516,7 +518,8 @@ LFSR random (	.clk1(iCLK_28),
 
 Food_Generator food(	.clk1(iCLK_28),
 						.clk2(iCLK_50),
-						.rst_n(DLY_RST),
+						.rst1_n(DLY28_RST),
+						.rst2_n(DLY_RST),
 						.xFood(x),
 						.yFood(y)
 );
