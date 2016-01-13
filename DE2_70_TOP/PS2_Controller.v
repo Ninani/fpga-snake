@@ -4,7 +4,8 @@ module PS2_Controller(
 	output reg up,
 	output reg left,
 	output reg down,
-	output reg right
+	output reg right,
+	output reg start
 );
 
 reg [7:0] current_data;
@@ -59,6 +60,8 @@ begin
 				down <= 1;
 			else if(previous_data == 8'h23)//'D'
 				right <= 1;
+			else if(previous_data == 8'h4D)//'P'
+				start <= 1;
 		end	
 			
 	else

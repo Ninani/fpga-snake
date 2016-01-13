@@ -23,7 +23,8 @@ module	VGA_Controller(	//	Host Side
 						iUpButton,
 						iDownButton,
 						iLeftButton,
-						iRightButton,	
+						iRightButton,
+						startButton,	
 						foodX,
 						foodY,
 						foodClk
@@ -54,6 +55,7 @@ input				iUpButton;
 input				iDownButton;
 input				iLeftButton;
 input				iRightButton;
+input				startButton;
 input		[9:0]	foodX;
 input		[9:0]	foodY;
 input				foodClk;
