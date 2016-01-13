@@ -435,6 +435,8 @@ Reset_Delay	r0	(	.iCLK(iCLK_50),.oRESET(DLY_RST)	);
 //From 50Hz to 25Hz
 PLL			p2	(.areset(~DLY_RST),.inclk0(iCLK_50),.c0(VGA_CTRL_CLK));
 
+Reset_Delay	r1	(	.iCLK(iCLK_28),.oRESET(DLY28_RST)	);
+
 wire	outerClk;			
 anim_prescaler	myPresc(		
 						.clkin(VGA_CTRL_CLK),
@@ -445,28 +447,7 @@ wire	buttonDown;
 wire	buttonLeft;	
 wire	buttonRight;
 wire	buttonStart;	
-/*						
-debouncer buttonUpDebouncer(		
-						.button(iKEY[0]),
-						.clk(VGA_CTRL_CLK),	
-						.bt_act(buttonUp)			
-					);
-debouncer buttonDownDebouncer(		
-						.button(iKEY[1]),
-						.clk(VGA_CTRL_CLK),
-						.bt_act(buttonDown)			
-					);
-debouncer buttonLeftDebouncer(		
-						.button(iKEY[2]),
-						.clk(VGA_CTRL_CLK),	
-						.bt_act(buttonLeft)			
-					);
-debouncer buttonRightDebouncer(		
-						.button(iKEY[3]),
-						.clk(VGA_CTRL_CLK),	
-						.bt_act(buttonRight)			
-					);
-*/					
+					
 VGA_Controller	myCtrl(	.iRed(mVGA_R),
 						.iGreen(mVGA_G),
 						.iBlue(mVGA_B),
@@ -498,25 +479,11 @@ VGA_Controller	myCtrl(	.iRed(mVGA_R),
 
 wire [9:0] x;
 wire [9:0] y;
-//wire foodClk;					
-
-/*					
-Food_Prescaler(	.clkin(iCLK_50_2),
-				.clkout(foodClk)
-);
-*/
-/*
-LFSR random (	.clk1(iCLK_28),
-				.clk2(iCLK_50),
-				.rst_n(DLY_RST),
-				.XCoord(x),
-				.YCoord(y)
-);
-*/
 
 Food_Generator food(	.clk1(iCLK_28),
 						.clk2(iCLK_50),
-						.rst_n(DLY_RST),
+						.rst1_n(DLY28_RST),
+						.rst2_n(DLY_RST),
 						.xFood(x),
 						.yFood(y)
 );
@@ -534,19 +501,6 @@ PS2_Controller keyCtrl( .data(PS2_KBDAT),
 
 
 
-
-////////////////////////////////////////
-
-////////////////////////////////////////
-/*
-always @(currentX or currentY)
- begin 
-    mVGA_R = 10'b1111111111;	//display red colour
-    mVGA_G = 10'b0000000000;
-    mVGA_B = 10'b0000000000;
-
-end
-*/
 
 
 endmodule
